@@ -32,12 +32,14 @@ npm install -D @types/leaflet
 
 ## Environment Variables
 
-Create `.env.local`:
+Create `.env.local` (never commit this file):
 
 ```env
-NEXT_PUBLIC_SUPABASE_URL=https://lqpeggadtuborolujbak.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_Ndc1KjeiiQMGqvijT47l3A_4fADnyf4
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
 ```
+
+Get these values from your Supabase project dashboard → Settings → API.
 
 ## Supabase Setup
 
