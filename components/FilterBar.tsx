@@ -17,47 +17,102 @@ export default function FilterBar({ active, onChange, totalCount }: FilterBarPro
     <div
       style={{
         position: 'relative',
-        background: 'rgba(255, 255, 255, 0.88)',
+        background: 'rgba(255, 255, 255, 0.92)',
         backdropFilter: 'blur(24px)',
         WebkitBackdropFilter: 'blur(24px)',
         borderBottom: '1px solid rgba(0,0,0,0.055)',
+        boxShadow: '0 1px 16px rgba(0,0,0,0.06)',
       }}
     >
-      {/* ── Top row: wordmark + live badge ── */}
+      {/* Top row: wordmark + live badge */}
       <div
         style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '14px 18px 0',
+          padding: '13px 18px 0',
         }}
       >
         {/* Wordmark */}
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 0 }}>
           <span
             style={{
               fontFamily: 'Inter, sans-serif',
-              fontSize: 20,
+              fontSize: 21,
               fontWeight: 800,
               color: '#0f172a',
-              letterSpacing: '-0.045em',
+              letterSpacing: '-0.05em',
               lineHeight: 1,
             }}
           >
             PinIt
           </span>
-          <span
+
+          {/* "Mumbai" — Mumbai Indians blue with hover shimmer */}
+          <motion.span
+            whileHover="hover"
+            initial="rest"
             style={{
               fontFamily: 'Inter, sans-serif',
-              fontSize: 20,
+              fontSize: 21,
               fontWeight: 300,
-              color: '#94a3b8',
-              letterSpacing: '-0.03em',
+              letterSpacing: '-0.035em',
               lineHeight: 1,
+              marginLeft: 7,
+              position: 'relative',
+              cursor: 'default',
+              display: 'inline-block',
             }}
           >
-            Mumbai
-          </span>
+            {/* Base text */}
+            <motion.span
+              variants={{
+                rest: { color: '#004BA0' },
+                hover: { color: '#0066CC' },
+              }}
+              transition={{ duration: 0.2 }}
+              style={{ position: 'relative', zIndex: 1 }}
+            >
+              Mumbai
+            </motion.span>
+
+            {/* Shimmer underline slides in on hover */}
+            <motion.span
+              variants={{
+                rest: { scaleX: 0, opacity: 0 },
+                hover: { scaleX: 1, opacity: 1 },
+              }}
+              transition={{ type: 'spring', stiffness: 400, damping: 28 }}
+              style={{
+                position: 'absolute',
+                bottom: -2,
+                left: 0,
+                right: 0,
+                height: 2,
+                background: 'linear-gradient(90deg, #004BA0, #0099FF, #004BA0)',
+                borderRadius: 999,
+                transformOrigin: 'left',
+                display: 'block',
+              }}
+            />
+
+            {/* Soft glow behind on hover */}
+            <motion.span
+              variants={{
+                rest: { opacity: 0 },
+                hover: { opacity: 1 },
+              }}
+              transition={{ duration: 0.25 }}
+              style={{
+                position: 'absolute',
+                inset: '-4px -6px',
+                background: 'rgba(0, 75, 160, 0.08)',
+                borderRadius: 6,
+                zIndex: 0,
+                display: 'block',
+              }}
+            />
+          </motion.span>
         </div>
 
         {/* Live pill */}
@@ -69,7 +124,7 @@ export default function FilterBar({ active, onChange, totalCount }: FilterBarPro
             background: '#fff1f2',
             border: '1px solid #fecdd3',
             borderRadius: 999,
-            padding: '4px 10px',
+            padding: '4px 11px',
           }}
         >
           <span
@@ -97,7 +152,7 @@ export default function FilterBar({ active, onChange, totalCount }: FilterBarPro
         </div>
       </div>
 
-      {/* ── Bottom row: filter chips ── */}
+      {/* Bottom row: filter chips */}
       <div
         style={{
           display: 'flex',
