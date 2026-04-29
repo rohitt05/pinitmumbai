@@ -11,6 +11,7 @@ import { Report } from '@/types/report';
 import { getCategoryById } from '@/lib/categories';
 import { supabase } from '@/lib/supabase';
 import HotspotLayer from './HotspotLayer';
+import StatsCard from './StatsCard';
 
 delete (L.Icon.Default.prototype as unknown as Record<string, unknown>)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -19,20 +20,19 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 });
 
-// Slightly zoomed out — shows full Mumbai + Thane + Navi Mumbai at a glance
 const MUMBAI: [number, number] = [19.15, 72.94];
 const INITIAL_ZOOM = 10;
 
 function createCategoryIcon(color: string, emoji: string) {
   return L.divIcon({
     className: '',
-    html: `<div style="position:relative;width:36px;height:36px;">
-      <div style="width:36px;height:36px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:${color};border:2.5px solid white;box-shadow:0 3px 10px rgba(0,0,0,0.3);"></div>
-      <span style="position:absolute;top:50%;left:50%;transform:translate(-50%,-56%);font-size:16px;line-height:1;">${emoji}</span>
+    html: `<div style="position:relative;width:34px;height:34px;">
+      <div style="width:34px;height:34px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:${color};border:2.5px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.25);"></div>
+      <span style="position:absolute;top:50%;left:50%;transform:translate(-50%,-56%);font-size:15px;line-height:1;">${emoji}</span>
     </div>`,
-    iconSize: [36, 36],
-    iconAnchor: [18, 36],
-    popupAnchor: [0, -40],
+    iconSize: [34, 34],
+    iconAnchor: [17, 34],
+    popupAnchor: [0, -38],
   });
 }
 
@@ -49,10 +49,10 @@ function getTimeAgo(dateStr: string): string {
 function buildPopupHTML(report: Report): string {
   const cat = getCategoryById(report.category);
   return `
-  <div style="width:270px;font-family:Inter,-apple-system,sans-serif;">
+  <div style="width:272px;font-family:Inter,-apple-system,sans-serif;">
     <div style="position:relative;">
-      <img src="${report.photo_url}" alt="" style="width:100%;height:160px;object-fit:cover;display:block;" />
-      <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.6) 0%,transparent 55%);pointer-events:none;"></div>
+      <img src="${report.photo_url}" alt="" style="width:100%;height:155px;object-fit:cover;display:block;" />
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.55) 0%,transparent 50%);pointer-events:none;"></div>
       <div style="position:absolute;bottom:10px;left:12px;">
         <span style="background:${cat?.color ?? '#374151'};color:white;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:0.03em;display:inline-flex;align-items:center;gap:4px;">
           ${cat?.emoji ?? '📍'} ${cat?.label ?? report.category}
@@ -60,7 +60,7 @@ function buildPopupHTML(report: Report): string {
       </div>
     </div>
     <div style="padding:12px 14px 14px;">
-      ${report.description ? `<p style="margin:0 0 6px;font-size:13px;color:#1f2937;line-height:1.45;font-weight:500;">${report.description}</p>` : ''}
+      ${report.description ? `<p style="margin:0 0 5px;font-size:13px;color:#1f2937;line-height:1.45;font-weight:500;">${report.description}</p>` : ''}
       ${report.area_name ? `<p style="margin:0 0 8px;font-size:11px;color:#9ca3af;">📍 ${report.area_name}</p>` : ''}
       <div style="display:flex;justify-content:space-between;align-items:center;padding-top:8px;border-top:1px solid #f3f4f6;">
         <span style="font-size:11px;color:#d1d5db;font-weight:500;">${getTimeAgo(report.created_at)}</span>
@@ -88,14 +88,15 @@ function MapInner({ reports, activeCategory, showHeatmap, onNewReport }: MapInne
   useEffect(() => {
     const group = L.markerClusterGroup({
       chunkedLoading: true,
-      maxClusterRadius: 60,
+      maxClusterRadius: 55,
       iconCreateFunction: (cluster) => {
         const n = cluster.getChildCount();
-        const size = n < 10 ? 38 : n < 50 ? 46 : 54;
-        const bg = n < 10 ? '#F97316' : n < 50 ? '#EF4444' : '#991B1B';
+        const size = n < 10 ? 36 : n < 50 ? 44 : n < 100 ? 52 : 60;
+        // NammaKasa-style: dark maroon
+        const bg = n < 5 ? '#ef4444' : n < 20 ? '#b91c1c' : '#7f1d1d';
         return L.divIcon({
           className: 'pinit-cluster',
-          html: `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${bg};border:3px solid rgba(255,255,255,0.9);box-shadow:0 3px 14px rgba(0,0,0,0.25);display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:13px;font-family:Inter,sans-serif;">${n}</div>`,
+          html: `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${bg};border:3px solid rgba(255,255,255,0.92);box-shadow:0 3px 12px rgba(0,0,0,0.22);display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:${n > 99 ? 11 : 13}px;font-family:Inter,sans-serif;">${n}</div>`,
           iconSize: [size, size],
         });
       },
@@ -149,32 +150,67 @@ function MapInner({ reports, activeCategory, showHeatmap, onNewReport }: MapInne
     return () => { supabase.removeChannel(channel); };
   }, [onNewReport]);
 
-  // On load, try GPS — if denied stay at the zoomed-out city view
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
-      (pos) => map.setView([pos.coords.latitude, pos.coords.longitude], 14),
-      () => {} // stay at MUMBAI z10
+      (pos) => map.setView([pos.coords.latitude, pos.coords.longitude], 13),
+      () => {}
     );
   }, [map]);
 
   return <HotspotLayer reports={reports} visible={showHeatmap} />;
 }
 
-export default function Map(props: MapInnerProps) {
+interface MapProps extends MapInnerProps {
+  totalReports: number;
+}
+
+export default function Map({ totalReports, ...props }: MapProps) {
   return (
-    <MapContainer
-      center={MUMBAI}
-      zoom={INITIAL_ZOOM}
-      style={{ width: '100vw', height: '100dvh' }}
-      zoomControl
-    >
-      <TileLayer
-        attribution='&copy; <a href="https://carto.com/attributions">CARTO</a>'
-        url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-        subdomains="abcd"
-        maxZoom={20}
-      />
-      <MapInner {...props} />
-    </MapContainer>
+    <div style={{ position: 'relative', width: '100vw', height: '100%' }}>
+      <MapContainer
+        center={MUMBAI}
+        zoom={INITIAL_ZOOM}
+        style={{ width: '100%', height: '100%' }}
+        zoomControl={false}
+      >
+        <TileLayer
+          attribution='&copy; <a href="https://carto.com/attributions">CARTO</a>'
+          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+          subdomains="abcd"
+          maxZoom={20}
+        />
+        <MapInner {...props} />
+      </MapContainer>
+
+      {/* Zoom controls — positioned manually like NammaKasa */}
+      <div style={{
+        position: 'absolute', bottom: 80, right: 16, zIndex: 500,
+        display: 'flex', flexDirection: 'column', gap: 2,
+        boxShadow: '0 2px 12px rgba(0,0,0,0.12)',
+        borderRadius: 8, overflow: 'hidden',
+        border: '1px solid #e5e7eb',
+      }}>
+        <button
+          onClick={() => document.querySelector('.leaflet-control-zoom-in') instanceof HTMLElement && (document.querySelector('.leaflet-control-zoom-in') as HTMLElement).click()}
+          style={{
+            width: 36, height: 36, background: 'white', border: 'none',
+            borderBottom: '1px solid #f3f4f6',
+            fontSize: 18, cursor: 'pointer', color: '#374151',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontWeight: 300,
+          }}>+</button>
+        <button
+          onClick={() => document.querySelector('.leaflet-control-zoom-out') instanceof HTMLElement && (document.querySelector('.leaflet-control-zoom-out') as HTMLElement).click()}
+          style={{
+            width: 36, height: 36, background: 'white', border: 'none',
+            fontSize: 18, cursor: 'pointer', color: '#374151',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontWeight: 300,
+          }}>−</button>
+      </div>
+
+      {/* Stats card — top-left over the map */}
+      <StatsCard totalReports={totalReports} activeReports={totalReports} />
+    </div>
   );
 }
