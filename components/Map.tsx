@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 import { MapContainer, TileLayer, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -68,7 +68,7 @@ export const MUMBAI_AREAS = Object.entries(BMC_WARD_INFO).map(([ward, info]) => 
   ward, ...info, lat: 0, lng: 0,
 }));
 
-// ── Single dot marker (no emoji, no teardrop) ──────────────────────────────
+// ── Single dot marker ──────────────────────────────────────────────────
 function createDotIcon() {
   return L.divIcon({
     className: '',
@@ -96,28 +96,79 @@ function getTimeAgo(dateStr: string): string {
 
 function buildPopupHTML(report: Report): string {
   const cat = getCategoryById(report.category);
+  const severity = report.upvotes > 10 ? 'HIGH' : report.upvotes > 4 ? 'MODERATE' : 'LOW';
+  const severityColor = severity === 'HIGH' ? '#ef4444' : severity === 'MODERATE' ? '#f97316' : '#22c55e';
+  const severityBg = severity === 'HIGH' ? '#fef2f2' : severity === 'MODERATE' ? '#fff7ed' : '#f0fdf4';
+  const severityBorder = severity === 'HIGH' ? '#fecaca' : severity === 'MODERATE' ? '#fed7aa' : '#bbf7d0';
+
   return `
-  <div style="width:272px;font-family:Inter,-apple-system,sans-serif;">
-    <div style="position:relative;">
-      <img src="${report.photo_url}" alt="" style="width:100%;height:155px;object-fit:cover;display:block;" />
-      <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.55) 0%,transparent 50%);pointer-events:none;"></div>
-      <div style="position:absolute;bottom:10px;left:12px;">
+  <div style="width:280px;font-family:Inter,-apple-system,sans-serif;border-radius:16px;overflow:hidden;">
+
+    <!-- top chips row -->
+    <div style="display:flex;align-items:center;gap:7px;padding:12px 14px 0;">
+      <span style="
+        background:${severityBg};color:${severityColor};
+        border:1px solid ${severityBorder};
+        padding:3px 9px;border-radius:999px;
+        font-size:10px;font-weight:800;letter-spacing:0.08em;
+      ">${severity}</span>
+      <span style="
+        background:#f1f5f9;color:#475569;
+        padding:3px 9px;border-radius:999px;
+        font-size:10px;font-weight:700;
+      ">Unresolved</span>
+    </div>
+
+    <!-- photo -->
+    <div style="position:relative;margin:10px 14px 0;border-radius:12px;overflow:hidden;">
+      <img src="${report.photo_url}" alt="" style="width:100%;height:160px;object-fit:cover;display:block;" />
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.45) 0%,transparent 55%);pointer-events:none;"></div>
+      <div style="position:absolute;bottom:9px;left:10px;">
         <span style="background:${cat?.color ?? '#374151'};color:white;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:0.03em;display:inline-flex;align-items:center;gap:4px;">
           ${cat?.emoji ?? '\uD83D\uDCCD'} ${cat?.label ?? report.category}
         </span>
       </div>
+      <button
+        data-report-id="${report.id}"
+        data-upvotes="${report.upvotes}"
+        style="
+          position:absolute;bottom:9px;right:10px;
+          background:rgba(255,255,255,0.92);border:none;border-radius:999px;
+          padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;
+          color:#1f2937;font-family:Inter,sans-serif;
+          display:flex;align-items:center;gap:4px;
+          box-shadow:0 1px 6px rgba(0,0,0,0.18);
+        ">
+        \uD83D\uDC4D I've seen this
+      </button>
     </div>
-    <div style="padding:12px 14px 14px;">
-      ${report.description ? `<p style="margin:0 0 5px;font-size:13px;color:#1f2937;line-height:1.45;font-weight:500;">${report.description}</p>` : ''}
-      ${report.area_name   ? `<p style="margin:0 0 8px;font-size:11px;color:#9ca3af;">\uD83D\uDCCD ${report.area_name}</p>` : ''}
-      <div style="display:flex;justify-content:space-between;align-items:center;padding-top:8px;border-top:1px solid #f3f4f6;">
-        <span style="font-size:11px;color:#d1d5db;font-weight:500;">${getTimeAgo(report.created_at)}</span>
-        <button
-          data-report-id="${report.id}"
-          data-upvotes="${report.upvotes}"
-          style="background:#fef2f2;border:1.5px solid #fecaca;border-radius:999px;padding:5px 14px;font-size:12px;font-weight:700;cursor:pointer;color:#ef4444;font-family:Inter,sans-serif;"
-        >\uD83D\uDC4D ${report.upvotes}</button>
+
+    <!-- meta stats row -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;padding:10px 14px 0;">
+      <div style="background:#f8fafc;border-radius:10px;padding:7px 8px;text-align:center;">
+        <div style="font-size:13px;font-weight:800;color:#ef4444;line-height:1;">1</div>
+        <div style="font-size:9px;color:#94a3b8;font-weight:600;margin-top:2px;text-transform:uppercase;letter-spacing:0.06em;">Reports</div>
       </div>
+      <div style="background:#f8fafc;border-radius:10px;padding:7px 8px;text-align:center;">
+        <div style="font-size:13px;font-weight:800;color:#f97316;line-height:1;">${Math.floor((Date.now() - new Date(report.created_at).getTime()) / 86400000)}</div>
+        <div style="font-size:9px;color:#94a3b8;font-weight:600;margin-top:2px;text-transform:uppercase;letter-spacing:0.06em;">Days</div>
+      </div>
+      <div style="background:#f8fafc;border-radius:10px;padding:7px 8px;text-align:center;">
+        <div style="font-size:11px;font-weight:800;color:#7c3aed;line-height:1.2;">${cat?.label ?? report.category}</div>
+        <div style="font-size:9px;color:#94a3b8;font-weight:600;margin-top:2px;text-transform:uppercase;letter-spacing:0.06em;">Type</div>
+      </div>
+    </div>
+
+    <!-- title / location -->
+    <div style="padding:10px 14px 0;">
+      ${report.description ? `<p style="margin:0 0 4px;font-size:13px;color:#1f2937;line-height:1.45;font-weight:600;">${report.description}</p>` : ''}
+      ${report.area_name   ? `<p style="margin:0;font-size:11px;color:#94a3b8;display:flex;align-items:center;gap:3px;">\uD83D\uDCCD ${report.area_name}</p>` : ''}
+    </div>
+
+    <!-- footer -->
+    <div style="padding:10px 14px 13px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid #f1f5f9;margin-top:10px;">
+      <span style="font-size:11px;color:#cbd5e1;font-weight:500;">Reported ${getTimeAgo(report.created_at)}</span>
+      <span style="font-size:11px;color:#cbd5e1;font-weight:500;">1 citizen(s)</span>
     </div>
   </div>`;
 }
@@ -131,11 +182,10 @@ interface MapInnerProps {
   onAreaHover: (area: AreaInfo | null) => void;
 }
 
-// Ward border only — transparent fill by default
 const WARD_DEFAULT_STYLE = {
   fillColor: 'transparent',
   fillOpacity: 0,
-  color: 'rgba(153,27,27,0.35)',   // faint dark-red border
+  color: 'rgba(153,27,27,0.35)',
   weight: 1.2,
   opacity: 1,
 };
@@ -147,7 +197,6 @@ const WARD_HOVER_STYLE = {
   opacity: 1,
 };
 
-// Constituency border only
 const AC_DEFAULT_STYLE = {
   fillColor: 'transparent',
   fillOpacity: 0,
@@ -173,7 +222,7 @@ function MapInner({ reports, activeCategory, showHeatmap, showConstituencies, on
   const constituencyLayerRef = useRef<L.GeoJSON | null>(null);
   const acLabelLayersRef     = useRef<L.Layer[]>([]);
 
-  // ── Cluster group — dark maroon bubbles like Namma Kasala ──────────────
+  // ── Cluster group ──────────────────────────────────────────────────────
   useEffect(() => {
     const group = (L as unknown as { markerClusterGroup: (o: unknown) => L.MarkerClusterGroup }).markerClusterGroup({
       chunkedLoading: true,
@@ -183,9 +232,7 @@ function MapInner({ reports, activeCategory, showHeatmap, showConstituencies, on
       zoomToBoundsOnClick: true,
       iconCreateFunction: (cluster: L.MarkerCluster) => {
         const n = cluster.getChildCount();
-        // Size grows with count — matches the screenshot style
         const size = n < 10 ? 36 : n < 30 ? 44 : n < 80 ? 52 : n < 200 ? 60 : n < 500 ? 68 : 76;
-        // Single dark-maroon tone; slightly lighter ring for large clusters
         const bg = '#7f1d1d';
         const fs = n > 999 ? 10 : n > 99 ? 12 : n > 9 ? 14 : 15;
         return L.divIcon({
@@ -212,7 +259,7 @@ function MapInner({ reports, activeCategory, showHeatmap, showConstituencies, on
     return () => { map.removeLayer(group); };
   }, [map]);
 
-  // ── Report markers — plain small dot, popup on click ──────────────────
+  // ── Report markers ─────────────────────────────────────────────────────
   useEffect(() => {
     const group = clusterGroupRef.current;
     if (!group) return;
@@ -220,7 +267,14 @@ function MapInner({ reports, activeCategory, showHeatmap, showConstituencies, on
     const filtered = activeCategory === 'all' ? reports : reports.filter((r) => r.category === activeCategory);
     filtered.forEach((report) => {
       const marker = L.marker([report.lat, report.lng], { icon: createDotIcon() });
-      marker.bindPopup(L.popup({ maxWidth: 300, className: 'pinit-popup' }).setContent(buildPopupHTML(report)));
+      marker.bindPopup(
+        L.popup({
+          maxWidth: 308,
+          className: 'pinit-popup',
+          closeButton: false,
+          offset: [0, -4],
+        }).setContent(buildPopupHTML(report))
+      );
       marker.on('popupopen', () => {
         const el = marker.getPopup()?.getElement();
         if (!el) return;
@@ -230,8 +284,9 @@ function MapInner({ reports, activeCategory, showHeatmap, showConstituencies, on
           if (btn.dataset.voted) return;
           btn.dataset.voted = '1';
           const n = parseInt(btn.dataset.upvotes ?? '0');
-          btn.innerHTML = `\uD83D\uDC4D ${n + 1}`;
-          btn.style.color = '#9ca3af'; btn.style.borderColor = '#e5e7eb'; btn.style.background = '#f9fafb';
+          btn.innerHTML = `\uD83D\uDC4D I've seen this (${n + 1})`;
+          btn.style.background = 'rgba(239,68,68,0.12)';
+          btn.style.color = '#ef4444';
           await fetch('/api/upvote', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: report.id }) });
         });
       });
@@ -239,7 +294,7 @@ function MapInner({ reports, activeCategory, showHeatmap, showConstituencies, on
     });
   }, [reports, activeCategory]);
 
-  // ── BMC ward borders — transparent fill, highlight on hover ───────────
+  // ── BMC ward borders — no text labels ────────────────────────────────
   useEffect(() => {
     if (wardLayerRef.current) { map.removeLayer(wardLayerRef.current); wardLayerRef.current = null; }
     labelLayersRef.current.forEach((l) => map.removeLayer(l));
@@ -254,7 +309,6 @@ function MapInner({ reports, activeCategory, showHeatmap, showConstituencies, on
         Object.keys(BMC_WARD_INFO).forEach((w) => { countByWard[w] = 0; });
 
         const wardLayer = L.geoJSON(geojson, {
-          // All wards same transparent style — no colour coding
           style: () => ({ ...WARD_DEFAULT_STYLE }),
           onEachFeature: (feature, layer) => {
             const raw: string = (
@@ -294,47 +348,7 @@ function MapInner({ reports, activeCategory, showHeatmap, showConstituencies, on
 
         wardLayer.addTo(map);
         wardLayerRef.current = wardLayer;
-
-        // Ward name labels (light, only visible when zoomed in)
-        wardLayer.eachLayer((layer) => {
-          const feature = (layer as L.GeoJSON & { feature: GeoJSON.Feature }).feature;
-          const raw: string = (
-            feature?.properties?.ward ??
-            feature?.properties?.WARD ??
-            feature?.properties?.WardName ??
-            feature?.properties?.ward_no ??
-            feature?.properties?.name ??
-            ''
-          ).toString().trim().toUpperCase();
-          const wardKey = raw.replace(/^([A-Z]+)([NS]|E|W|C)$/, '$1/$2');
-          const info = BMC_WARD_INFO[wardKey];
-          if (!info) return;
-
-          const poly   = layer as L.Polygon;
-          const center = poly.getBounds().getCenter();
-
-          const label = L.marker(center, {
-            icon: L.divIcon({
-              className: '',
-              html: `<div style="
-                display:flex;flex-direction:column;align-items:center;
-                pointer-events:none;user-select:none;
-                font-family:Inter,-apple-system,sans-serif;
-                text-shadow:0 1px 3px rgba(255,255,255,0.9);
-              ">
-                <span style="font-size:8px;font-weight:800;color:#991b1b;letter-spacing:0.14em;line-height:1;opacity:0.8;">WARD ${wardKey}</span>
-                <span style="font-size:9px;font-weight:600;color:#374151;letter-spacing:0.02em;line-height:1.4;white-space:nowrap;opacity:0.85;">${info.name.toUpperCase()}</span>
-              </div>`,
-              iconSize: [170, 26],
-              iconAnchor: [85, 13],
-            }),
-            interactive: false,
-            pane: 'tooltipPane',
-          } as L.MarkerOptions);
-
-          map.addLayer(label);
-          labelLayersRef.current.push(label);
-        });
+        // ── No text labels added — map stays clean ──
       })
       .catch(console.error);
 
@@ -345,7 +359,7 @@ function MapInner({ reports, activeCategory, showHeatmap, showConstituencies, on
     };
   }, [map, reports, onAreaHover]);
 
-  // ── Assembly constituency borders — transparent fill, highlight on hover
+  // ── Assembly constituency borders — no text labels ─────────────────
   useEffect(() => {
     if (constituencyLayerRef.current) { map.removeLayer(constituencyLayerRef.current); constituencyLayerRef.current = null; }
     acLabelLayersRef.current.forEach((l) => map.removeLayer(l));
@@ -361,14 +375,13 @@ function MapInner({ reports, activeCategory, showHeatmap, showConstituencies, on
         const acLayer = L.geoJSON(geojson, {
           style: () => ({ ...AC_DEFAULT_STYLE }),
           onEachFeature: (feature, layer) => {
-            const props      = feature.properties as Record<string, unknown>;
-            const acName     = (props?.AC_NAME as string) ?? 'Unknown';
-            const acNo       = props?.AC_NO as number;
-            const pcName     = (props?.PC_NAME as string) ?? '';
+            const props  = feature.properties as Record<string, unknown>;
+            const acName = (props?.AC_NAME as string) ?? 'Unknown';
+            const acNo   = props?.AC_NO as number;
+            const pcName = (props?.PC_NAME as string) ?? '';
             if (!acName) return;
 
             const poly = layer as L.Polygon;
-
             const getCount = () => reports.filter((r) => poly.getBounds().contains(L.latLng(r.lat, r.lng))).length;
 
             poly.on('mouseover', () => {
@@ -400,40 +413,7 @@ function MapInner({ reports, activeCategory, showHeatmap, showConstituencies, on
 
         acLayer.addTo(map);
         constituencyLayerRef.current = acLayer;
-
-        // AC labels
-        acLayer.eachLayer((layer) => {
-          const feature = (layer as L.GeoJSON & { feature: GeoJSON.Feature }).feature;
-          const props   = feature.properties as Record<string, unknown>;
-          const acName  = (props?.AC_NAME as string) ?? '';
-          const acNo    = props?.AC_NO as number;
-          if (!acName) return;
-
-          const poly   = layer as L.Polygon;
-          const center = poly.getBounds().getCenter();
-
-          const label = L.marker(center, {
-            icon: L.divIcon({
-              className: '',
-              html: `<div style="
-                display:flex;flex-direction:column;align-items:center;
-                pointer-events:none;user-select:none;
-                font-family:Inter,-apple-system,sans-serif;
-                text-shadow:0 1px 4px rgba(255,255,255,0.95);
-              ">
-                <span style="font-size:7.5px;font-weight:800;color:#6d28d9;letter-spacing:0.16em;line-height:1;opacity:0.75;">AC ${acNo}</span>
-                <span style="font-size:9px;font-weight:700;color:#4c1d95;letter-spacing:0.04em;line-height:1.4;white-space:nowrap;">${acName.toUpperCase()}</span>
-              </div>`,
-              iconSize: [180, 26],
-              iconAnchor: [90, 13],
-            }),
-            interactive: false,
-            pane: 'tooltipPane',
-          } as L.MarkerOptions);
-
-          map.addLayer(label);
-          acLabelLayersRef.current.push(label);
-        });
+        // ── No AC text labels added — map stays clean ──
       })
       .catch(console.error);
 
@@ -474,7 +454,14 @@ interface MapProps extends Omit<MapInnerProps, 'onAreaHover'> {
 export default function Map({ totalReports, navbarHeight, onAreaHover, ...props }: MapProps) {
   const mapRef = useRef<L.Map | null>(null);
   const handleAreaHover = useCallback((a: AreaInfo | null) => onAreaHover(a), [onAreaHover]);
-  const showConstituencies = (props as unknown as { showConstituencies?: boolean }).showConstituencies ?? false;
+  const [showConstituencies, setShowConstituencies] = useState(
+    (props as unknown as { showConstituencies?: boolean }).showConstituencies ?? false
+  );
+
+  useEffect(() => {
+    const c = (props as unknown as { showConstituencies?: boolean }).showConstituencies;
+    if (c !== undefined) setShowConstituencies(c);
+  }, [(props as unknown as { showConstituencies?: boolean }).showConstituencies]);
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
@@ -519,11 +506,7 @@ export default function Map({ totalReports, navbarHeight, onAreaHover, ...props 
 
       {/* Constituency toggle pill */}
       <button
-        onClick={() => {
-          mapRef.current?.getContainer().dispatchEvent(
-            new CustomEvent('toggle-constituencies', { bubbles: true })
-          );
-        }}
+        onClick={() => setShowConstituencies(prev => !prev)}
         style={{
           position: 'fixed',
           bottom: navbarHeight + 24,
