@@ -1,5 +1,6 @@
 'use client';
 
+import { useRef, useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AreaInfo } from './Map';
 
@@ -10,7 +11,7 @@ interface StatsCardProps {
   hoveredArea: AreaInfo | null;
 }
 
-function WardCard({ area }: { area: AreaInfo }) {
+function WardCard({ top, area }: { top: number; area: AreaInfo }) {
   const intensity =
     area.count === 0 ? 'No issues' :
     area.count < 3  ? 'Low' :
@@ -27,19 +28,24 @@ function WardCard({ area }: { area: AreaInfo }) {
       exit={{ opacity: 0, y: -4 }}
       transition={{ duration: 0.18, ease: 'easeOut' }}
       style={{
+        position: 'fixed',
+        top,
+        left: 16,
+        width: 210,
+        zIndex: 900,
         background: 'white',
         borderRadius: 14,
         boxShadow: '0 4px 24px rgba(0,0,0,0.13)',
         border: '1px solid rgba(0,0,0,0.06)',
         padding: '14px 16px',
         fontFamily: 'Inter, sans-serif',
-        width: '100%',
       }}
     >
       <div style={{
         fontSize: 14, fontWeight: 800, color: '#0f172a',
         letterSpacing: '-0.03em', marginBottom: 2,
       }}>{area.name}</div>
+
       <div style={{
         fontSize: 11, color: '#94a3b8', fontWeight: 500, marginBottom: 12,
       }}>Ward #{area.ward} &nbsp;·&nbsp; {area.direction}</div>
@@ -65,6 +71,7 @@ function WardCard({ area }: { area: AreaInfo }) {
           padding: '4px 10px', borderRadius: 999,
         }}>{intensity}</span>
       </div>
+
       <div style={{ fontSize: 10, color: '#cbd5e1', marginTop: 6 }}>
         {area.zone} Zone
       </div>
@@ -73,27 +80,36 @@ function WardCard({ area }: { area: AreaInfo }) {
 }
 
 export default function StatsCard({ totalReports, activeReports, navbarHeight, hoveredArea }: StatsCardProps) {
+  const statsRef = useRef<HTMLDivElement>(null);
+  const [wardTop, setWardTop] = useState(0);
+
+  // Measure the stats card bottom edge so WardCard sits exactly 10px below it
+  useEffect(() => {
+    if (!statsRef.current) return;
+    const update = () => {
+      const rect = statsRef.current!.getBoundingClientRect();
+      setWardTop(rect.bottom + 10);
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(statsRef.current);
+    return () => ro.disconnect();
+  }, [navbarHeight]);
+
   return (
-    <div
-      style={{
-        position: 'fixed',
-        top: navbarHeight + 16,
-        left: 16,
-        zIndex: 900,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 10,
-        width: 210,
-        fontFamily: 'Inter, sans-serif',
-        pointerEvents: 'none',
-      }}
-    >
-      {/* Stats card */}
+    <>
+      {/* Stats card — fixed left, below navbar */}
       <motion.div
+        ref={statsRef}
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.25, duration: 0.35, ease: 'easeOut' }}
         style={{
+          position: 'fixed',
+          top: navbarHeight + 16,
+          left: 16,
+          zIndex: 900,
+          width: 210,
           background: 'white',
           borderRadius: 14,
           padding: '13px 18px',
@@ -102,6 +118,7 @@ export default function StatsCard({ totalReports, activeReports, navbarHeight, h
           display: 'flex',
           alignItems: 'center',
           gap: 14,
+          fontFamily: 'Inter, sans-serif',
         }}
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -114,7 +131,9 @@ export default function StatsCard({ totalReports, activeReports, navbarHeight, h
             textTransform: 'uppercase', letterSpacing: '0.08em',
           }}>Active</span>
         </div>
+
         <div style={{ width: 1, height: 32, background: '#f3f4f6' }} />
+
         <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
           <span style={{
             fontSize: 22, fontWeight: 800, color: '#f97316',
@@ -127,10 +146,12 @@ export default function StatsCard({ totalReports, activeReports, navbarHeight, h
         </div>
       </motion.div>
 
-      {/* Ward hover card — slides in below stats */}
+      {/* Ward card — independently fixed, measured to sit 10px below stats card */}
       <AnimatePresence>
-        {hoveredArea && <WardCard key={hoveredArea.name} area={hoveredArea} />}
+        {hoveredArea && wardTop > 0 && (
+          <WardCard key={hoveredArea.name} top={wardTop} area={hoveredArea} />
+        )}
       </AnimatePresence>
-    </div>
+    </>
   );
 }
