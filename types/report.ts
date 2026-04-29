@@ -17,4 +17,6 @@ export interface Report {
   photo_url: string;
   upvotes: number;
   created_at: string;
+  // Derived client-side — not stored in DB
+  ward_key?: string;
 }

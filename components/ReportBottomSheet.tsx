@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Report } from '@/types/report';
 import { getCategoryById } from '@/lib/categories';
+import { getWardKeyFromLatLng } from '@/lib/ward-lookup';
 import {
   getPrabhagsByAdminWard,
   getMlaByConstituency,
@@ -61,14 +62,18 @@ export default function ReportBottomSheet({ report, onClose }: Props) {
   const severityBg    = severity === 'HIGH' ? '#fef2f2' : severity === 'MODERATE' ? '#fff7ed' : '#f0fdf4';
   const severityBorder= severity === 'HIGH' ? '#fecaca' : severity === 'MODERATE' ? '#fed7aa' : '#bbf7d0';
 
-  const adminWard: string = (report as Report & { ward_key?: string })?.ward_key ?? '';
+  // ── Derive admin ward from lat/lng directly — no ward_key dependency ──────
+  const adminWard: string = report
+    ? (report.ward_key ?? getWardKeyFromLatLng(report.lat, report.lng))
+    : '';
+
   const prabhags = adminWard ? getPrabhagsByAdminWard(adminWard) : [];
   const constituencyHint = WARD_TO_CONSTITUENCY_HINT[adminWard] ?? '';
   const mlaInfo = constituencyHint
     ? getMlaByConstituency(constituencyHint)
     : MUMBAI_SUBURBAN_MLAS.find(() => false);
 
-  // collect all micro-areas for every prabhag in this admin ward
+  // Collect all micro-areas across every prabhag in this admin ward
   const allMicroAreas: { wardNo: number; neighbourhood: string }[] = prabhags.flatMap((p) =>
     getMicroAreasByWardNo(p.ward_no).map((n) => ({ wardNo: p.ward_no, neighbourhood: n }))
   );
@@ -207,7 +212,7 @@ export default function ReportBottomSheet({ report, onClose }: Props) {
                 </div>
               </div>
 
-              {/* ── LAYER 2: Nagar Sevaks ───────────────────────────────── */}
+              {/* ── LAYER 2: Nagar Sevaks ─────────────────────────────── */}
               <div style={{ borderTop: '1px solid #f1f5f9', padding: '18px 16px 0' }}>
                 <div style={{ fontSize: 10, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 14 }}>
                   Nagar Sevaks — Ward {adminWard || 'Unknown'}
@@ -251,7 +256,7 @@ export default function ReportBottomSheet({ report, onClose }: Props) {
                 )}
               </div>
 
-              {/* ── LAYER 2b: Micro-area / Neighbourhood Tiles ──────────── */}
+              {/* ── LAYER 2b: Micro-area / Neighbourhood Tiles ─────────── */}
               <div style={{ borderTop: '1px solid #f1f5f9', padding: '18px 16px 0' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
                   <div style={{ fontSize: 10, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.12em' }}>
@@ -265,7 +270,6 @@ export default function ReportBottomSheet({ report, onClose }: Props) {
                 </div>
 
                 {allMicroAreas.length === 0 ? (
-                  /* Empty state */
                   <div style={{
                     textAlign: 'center', padding: '20px 12px 24px',
                     background: '#fafafa', borderRadius: 14,
@@ -276,7 +280,7 @@ export default function ReportBottomSheet({ report, onClose }: Props) {
                       No micro-area data yet
                     </div>
                     <div style={{ fontSize: 11, color: '#94a3b8', fontWeight: 500 }}>
-                      Neighbourhood tiles for this ward are being mapped.
+                      Neighbourhood tiles for Ward {adminWard} are being mapped.
                     </div>
                   </div>
                 ) : (
@@ -286,7 +290,6 @@ export default function ReportBottomSheet({ report, onClose }: Props) {
                         key={`${wardNo}-${neighbourhood}`}
                         neighbourhood={neighbourhood}
                         wardNo={wardNo}
-                        // Future: pass a count from reports prop when available
                         reportCount={0}
                       />
                     ))}
@@ -294,7 +297,7 @@ export default function ReportBottomSheet({ report, onClose }: Props) {
                 )}
               </div>
 
-              {/* ── LAYER 3: MLA ──────────────────────────────────────────── */}
+              {/* ── LAYER 3: MLA ──────────────────────────────────────── */}
               <div style={{ borderTop: '1px solid #f1f5f9', padding: '18px 16px 0' }}>
                 <div style={{ fontSize: 10, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 14 }}>
                   MLA — Assembly Representative
@@ -343,7 +346,7 @@ export default function ReportBottomSheet({ report, onClose }: Props) {
                 )}
               </div>
 
-              {/* ── LAYER 4: BMC Accountability chain ────────────────────── */}
+              {/* ── LAYER 4: BMC Accountability chain ─────────────────── */}
               <div style={{ borderTop: '1px solid #f1f5f9', padding: '18px 16px 0' }}>
                 <div style={{ fontSize: 10, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 14 }}>
                   BMC Accountability Chain
@@ -371,7 +374,7 @@ export default function ReportBottomSheet({ report, onClose }: Props) {
                 </div>
               </div>
 
-              {/* ── CTAs ──────────────────────────────────────────────────────── */}
+              {/* ── CTAs ─────────────────────────────────────────────────── */}
               <div style={{ borderTop: '1px solid #f1f5f9', padding: '16px 16px 32px', display: 'flex', flexDirection: 'column', gap: 10 }}>
                 <button style={{
                   background: '#16a34a', color: 'white', border: 'none',
@@ -403,7 +406,7 @@ export default function ReportBottomSheet({ report, onClose }: Props) {
   );
 }
 
-// ── Micro-area tile ─────────────────────────────────────────────────────────
+// ── Micro-area tile ────────────────────────────────────────────────────────
 function MicroAreaTile({
   neighbourhood,
   wardNo,
@@ -421,13 +424,12 @@ function MicroAreaTile({
         background: hasData ? '#fff7ed' : '#f8fafc',
         border: `1.5px solid ${hasData ? '#fed7aa' : '#e2e8f0'}`,
         borderRadius: 10,
-        padding: '8px 10px 8px 10px',
+        padding: '8px 10px',
         minWidth: 100,
         maxWidth: 160,
         flexShrink: 0,
       }}
     >
-      {/* Prabhag badge */}
       <div style={{
         fontSize: 8, fontWeight: 800, color: '#94a3b8',
         textTransform: 'uppercase', letterSpacing: '0.1em',
@@ -435,16 +437,12 @@ function MicroAreaTile({
       }}>
         Prabhag {wardNo}
       </div>
-
-      {/* Neighbourhood name */}
       <div style={{
         fontSize: 11, fontWeight: 700, color: '#1e293b',
         lineHeight: 1.3, marginBottom: 5,
       }}>
         {neighbourhood}
       </div>
-
-      {/* Status badge */}
       {hasData ? (
         <span style={{
           display: 'inline-flex', alignItems: 'center', gap: 3,
