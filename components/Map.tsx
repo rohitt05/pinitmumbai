@@ -177,7 +177,7 @@ interface MapInnerProps {
   reports: Report[];
   activeCategory: string;
   showHeatmap: boolean;
-  showConstituencies: boolean;
+  showConstituencies?: boolean;
   onNewReport: (r: Report) => void;
   onAreaHover: (area: AreaInfo | null) => void;
 }
@@ -322,7 +322,7 @@ function MapInner({ reports, activeCategory, showHeatmap, showConstituencies, on
             const wardKey = raw.replace(/^([A-Z]+)([NS]|E|W|C)$/, '$1/$2');
             const info = BMC_WARD_INFO[wardKey];
 
-            const bounds = (layer as L.Path).getBounds?.();
+            const bounds = (layer as L.Polygon).getBounds?.();
             const count = bounds
               ? reports.filter((r) => bounds.contains(L.latLng(r.lat, r.lng))).length
               : 0;
@@ -454,14 +454,11 @@ interface MapProps extends Omit<MapInnerProps, 'onAreaHover'> {
 export default function Map({ totalReports, navbarHeight, onAreaHover, ...props }: MapProps) {
   const mapRef = useRef<L.Map | null>(null);
   const handleAreaHover = useCallback((a: AreaInfo | null) => onAreaHover(a), [onAreaHover]);
-  const [showConstituencies, setShowConstituencies] = useState(
-    (props as unknown as { showConstituencies?: boolean }).showConstituencies ?? false
-  );
+  const [showConstituencies, setShowConstituencies] = useState(props.showConstituencies ?? false);
 
   useEffect(() => {
-    const c = (props as unknown as { showConstituencies?: boolean }).showConstituencies;
-    if (c !== undefined) setShowConstituencies(c);
-  }, [(props as unknown as { showConstituencies?: boolean }).showConstituencies]);
+    if (props.showConstituencies !== undefined) setShowConstituencies(props.showConstituencies);
+  }, [props.showConstituencies]);
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
