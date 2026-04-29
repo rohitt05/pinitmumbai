@@ -16,6 +16,11 @@ export type MlaInfo = {
   party: string;
 };
 
+export type MicroArea = {
+  ward_no: number;
+  neighbourhoods: string[]; // specific localities inside that prabhag
+};
+
 // ── 2026 MLA Data ─────────────────────────────────────────────────────────────
 export const MUMBAI_SUBURBAN_MLAS: MlaInfo[] = [
   { constituency: '152-Borivali',             mla_name: 'Sanjay Upadhay',               party: 'BJP' },
@@ -47,7 +52,6 @@ export const MUMBAI_SUBURBAN_MLAS: MlaInfo[] = [
 ];
 
 // ── 2024/2026 Corporator / Nagar Sevak Data ───────────────────────────────────
-// admin_ward mapping is based on BMC ward number ranges from official BMC records
 export const MUMBAI_PRABHAGS: PrabhagInfo[] = [
   { ward_no: 1,   candidate: 'Rekha Yadav',                          party: 'Shiv Sena',      admin_ward: 'A'   },
   { ward_no: 2,   candidate: 'Tejashwi Ghosalkar',                   party: 'Shiv Sena',      admin_ward: 'A'   },
@@ -277,6 +281,297 @@ export const MUMBAI_PRABHAGS: PrabhagInfo[] = [
   { ward_no: 227, candidate: 'Gauravi Shivalkar Narwekar',            party: 'BJP',            admin_ward: 'A'   },
 ];
 
+// ── Micro-area / neighbourhood tiles per Prabhag (ward_no) ───────────────────
+// These are the actual localities, colonies, nagar, chawls that fall inside each
+// prabhag. Used to render "micro tiles" in the bottom sheet.
+export const PRABHAG_MICRO_AREAS: Record<number, string[]> = {
+  // Ward A — Colaba / Churchgate
+  1:  ['Colaba Causeway', 'Navy Nagar', 'Afghan Memorial Church area'],
+  2:  ['Cuffe Parade', 'World Trade Centre', 'Backbay Reclamation'],
+  3:  ['Churchgate', 'Nariman Point', 'Fort', 'Mantralaya'],
+  // Ward B — Dongri / Mazagaon
+  4:  ['Mazagaon', 'Dockyard Road', 'P. D\'Mello Road'],
+  5:  ['Dongri', 'Musafirkhana', 'Mohd. Ali Road'],
+  6:  ['Nagpada', 'Byculla (part)', 'J. J. Hospital area'],
+  7:  ['Masjid Bunder', 'Carnac Bunder', 'Mandvi'],
+  // Ward C — Pydhonie / Bhuleshwar
+  8:  ['Pydhonie', 'Bhuleshwar', 'Kalbadevi'],
+  9:  ['Crawford Market', 'Lohar Chawl', 'Princess Street'],
+  10: ['Mandvi', 'Null Bazaar', 'Bhendi Bazaar'],
+  11: ['Carnac Bridge', 'Sandhurst Road', 'Maulana Shaukat Ali Road'],
+  // Ward D — Girgaon / Malabar Hill
+  12: ['Girgaon', 'Chowpatty', 'Teen Batti'],
+  13: ['Malabar Hill', 'Ridge Road', 'B. G. Kher Marg'],
+  14: ['Grant Road (W)', 'Tardeo', 'Bhulabhai Desai Road'],
+  15: ['Breach Candy', 'Kemps Corner', 'Peddar Road'],
+  // Ward E — Byculla / Sewri
+  16: ['Byculla (E)', 'Agripada', 'Naigaon'],
+  17: ['Sewri', 'Cotton Green', 'Reay Road'],
+  18: ['NM Joshi Marg', 'Lower Parel (part)', 'Chinchpokli'],
+  19: ['Antop Hill (part)', 'Dockyard', 'Ferry Wharf'],
+  // Ward F/N — Matunga / Sion
+  20: ['Matunga (E)', 'Dharavi (N)', 'Sion (part)'],
+  21: ['Sion', 'Chunabhatti (part)', 'Antop Hill'],
+  22: ['Wadala (E)', 'GTB Nagar', 'Anik'],
+  23: ['Dharavi', 'Kala Killa', 'Transit Camp'],
+  24: ['Matunga (W)', 'King\'s Circle', 'Hindmata'],
+  // Ward F/S — Parel / Lower Parel
+  25: ['Parel', 'Tulsiwadi', 'Ganesh Nagar'],
+  26: ['Lalbaug', 'Curry Road', 'Kalachowki'],
+  27: ['Lower Parel', 'Kamla Mills', 'Senapati Bapat Marg'],
+  28: ['Naigaon (S)', 'Worli Koliwada (part)', 'Elphinstone Rd'],
+  // Ward G/N — Dadar / Shivaji Park
+  29: ['Dadar TT', 'Dadar Chowk', 'Hindu Colony'],
+  30: ['Shivaji Park', 'Chaityabhoomi', 'Cadell Road'],
+  31: ['Mahim', 'Bandra Terminus area', 'Dharavi (W)'],
+  32: ['Dharavi (S)', 'Sion Koliwada (part)', 'Rajiv Gandhi Nagar'],
+  // Ward G/S — Worli / Prabhadevi
+  33: ['Worli', 'Worli Sea Face', 'Atria Mall area'],
+  34: ['Prabhadevi', 'Siddhivinayak', 'Gokhale Rd'],
+  35: ['Century Mills', 'Elphinstone Road (W)', 'Agripada (S)'],
+  // Ward H/E — Bandra East
+  36: ['Bandra East', 'Kherwadi', 'BKC (part)'],
+  37: ['Kurla West (part)', 'Nehru Nagar', 'Vakola (part)'],
+  38: ['Santacruz East', 'Vakola', 'Nehru Road'],
+  39: ['Khar East', 'Kranti Nagar', 'CST Road'],
+  40: ['Dharavi (E)', 'Sion-Bandra Link area', 'Kalanagar'],
+  // Ward H/W — Bandra West
+  41: ['Bandra West', 'Pali Hill', 'Mount Mary'],
+  42: ['Khar West', 'Perry Cross Road', 'Linking Road (N)'],
+  43: ['Santacruz West', 'Juhu Tara Road', 'Carter Road'],
+  44: ['Reclamation', 'Chapel Road', 'Ranwar Village'],
+  // Ward K/E — Andheri East / Sakinaka
+  45: ['Andheri East (N)', 'Marol Military Road', 'Kondivita'],
+  46: ['MIDC Andheri', 'Chakala', 'International Airport area'],
+  47: ['JB Nagar', 'Guru Nanak Nagar', 'Nehru Nagar (Andheri)'],
+  48: ['Sakinaka', 'Asalpha', 'Khairani Road'],
+  49: ['Kurla (E)', 'Nehru Nagar Kurla', 'Kamani'],
+  50: ['Powai (part)', 'Saki Vihar Road', 'Chandivali (part)'],
+  // Ward K/W — Andheri West / Versova
+  51: ['Andheri West', 'D. N. Nagar', 'Gilbert Hill'],
+  52: ['Lokhandwala', 'Oshiwara', 'Andheri Market'],
+  53: ['Versova', 'Four Bungalows', 'Seven Bungalows'],
+  54: ['Juhu (part)', 'JVPD Scheme', 'Vile Parle (W) border'],
+  55: ['Jogeshwari West', 'Pratap Nagar', 'Motilal Nagar (W)'],
+  56: ['Goregaon West (border)', 'Film City Road', 'Aarey Road (part)'],
+  // Ward L — Kurla / Saki Naka
+  57: ['Kurla West', 'Bharat Nagar', 'Wadi'],
+  58: ['Kurla East', 'Tilak Nagar Kurla', 'Lokmanya Nagar'],
+  59: ['Saki Naka', 'Chandivali', 'Powai Lake border'],
+  60: ['Ghatkopar West (border)', 'LBS Marg Kurla', 'Bail Bazaar'],
+  61: ['Chunabhatti', 'Sion-Panvel Highway', 'Govandi border'],
+  // Ward M/E — Govandi / Mankhurd
+  62: ['Govandi', 'Shivaji Nagar Govandi', 'Baiganwadi'],
+  63: ['Mankhurd', 'Natwar Parekh Colony', 'M/East boundary'],
+  64: ['Deonar', 'Asalfa', 'Ramabai Nagar'],
+  65: ['Trombay', 'Chembur Colony', 'Anushakti Nagar border'],
+  66: ['Tata Colony Mankhurd', 'Mahul Village', 'Rafiq Nagar'],
+  // Ward M/W — Chembur West
+  67: ['Chembur', 'RCF Colony', 'Diamond Garden'],
+  68: ['Tilak Nagar', 'Sion-Panvel Expressway area', 'Suman Nagar'],
+  69: ['Sion Koliwada', 'Pratiksha Nagar', 'Chunabhatti (W)'],
+  70: ['Mahul', 'Ambapada', 'Trombay Road'],
+  // Ward N — Ghatkopar
+  71: ['Ghatkopar East', 'Jawahar Nagar', 'Vikhroli border'],
+  72: ['Ghatkopar West', 'LBS Marg', 'Pant Nagar'],
+  73: ['Rajawadi', 'Shreyas Colony', 'Sarvoday Nagar'],
+  74: ['Vikhroli West', 'Tagore Nagar', 'Gandhi Nagar Ghatkopar'],
+  75: ['Asalpha', 'Ramabai Colony', 'Saki Naka border'],
+  // Ward P/N — Malad East / Kandivali East
+  76: ['MIDC Marol', 'Parashant Nagar', 'Sahakar Nagar Malad'],
+  77: ['Malad East', 'Dindoshi', 'Kurar Village'],
+  78: ['Kandivali East', 'Thakur Village', 'Samata Nagar'],
+  79: ['Poisar', 'Mahindra Park', 'Charkop Sector 1'],
+  80: ['Charkop', 'Charkop Sector 7-8', 'Eksar'],
+  81: ['Kandivali East (S)', 'Lokhandwala Kandivali', 'IC Colony (part)'],
+  // Ward P/S — Goregaon / Malad West
+  82: ['Goregaon East', 'Aarey Colony', 'Film City'],
+  84: ['Goregaon West', 'Motilal Nagar', 'Ram Mandir'],
+  85: ['Malad West', 'Orlem', 'Marve Road'],
+  86: ['Malad (S)', 'Chincholi Bunder', 'Malvani'],
+  // Ward R/C — Kandivali West
+  87: ['Kandivali West', 'Akurli Road', 'Poisar Gymkhana'],
+  88: ['Dahisar (part)', 'Mira Rd border', 'Borivali Naka'],
+  89: ['Borivali West (part)', 'Mandapeshwar', 'Devipada'],
+  // Ward R/N — Borivali North / Dahisar
+  90: ['Dahisar East', 'Sai Baba Nagar Dahisar', 'Rawalpada'],
+  91: ['Dahisar West', 'Dahisar Checknaka', 'Anand Nagar Dahisar'],
+  92: ['Borivali North', 'Poisar River area', 'Shimpoli (part)'],
+  93: ['Borivali (E)', 'Kasturba Road Borivali', 'LIC Colony Borivali'],
+  // Ward R/S — Borivali South
+  94: ['Borivali South', 'IC Colony', 'Shimpoli'],
+  95: ['Samata Nagar Borivali', 'Eksar Road', 'Borivali Station (W)'],
+  96: ['Daulat Nagar', 'New Mhada Borivali', 'Poisar (S)'],
+  97: ['Borivali (W) market', 'SV Road Borivali', 'Vazira Naka'],
+  // Ward S — Vikhroli / Bhandup
+  98:  ['Vikhroli East', 'Godrej Colony', 'Vikhroli Industrial Estate'],
+  99:  ['Bhandup East', 'Nahur', 'Kanjurmarg (part)'],
+  100: ['Bhandup West', 'Sonapur', 'LBS Marg Bhandup'],
+  101: ['Powai', 'Hiranandani Gardens', 'IIT Bombay area'],
+  102: ['Kanjurmarg', 'Lal Bahadur Shastri Road', 'Bhandup industrial'],
+  // Ward T — Mulund
+  103: ['Mulund East', 'Airoli Bridge area', 'Nahur Station'],
+  104: ['Mulund West', 'Mulund Market', 'SV Road Mulund'],
+  105: ['Mulund (N)', 'Sarvodaya Nagar Mulund', 'Kopri (border)'],
+  106: ['Mulund Colony', 'LBS Marg Mulund', 'Veena Nagar'],
+  107: ['Bhandup North', 'Sonapur (part)', 'Mulund Octroi'],
+  108: ['Mulund (W) hills', 'Rambaug Colony', 'Tulsi Pipe Road'],
+  // Remaining ward S entries (109–111)
+  109: ['Vikhroli (S)', 'Tagore Nagar (S)', 'Pipe Road area'],
+  110: ['Bhandup (S)', 'Kanjurmarg East', 'Nehru Nagar Bhandup'],
+  111: ['Kanjurmarg West', 'Shubh Housing', 'LBS Marg (W)'],
+  // Remaining ward N (112–115)
+  112: ['Ghatkopar (N)', 'Vidya Vihar', 'Vikhroli link road'],
+  113: ['Gandhi Nagar GK', 'Pant Nagar (N)', 'Tilak Nagar GK'],
+  114: ['Rajawadi (N)', 'Hingwala Lane', 'Central Avenue GK'],
+  115: ['Ghatkopar West (N)', 'Vikhroli W border', 'Khairani Road (N)'],
+  // Remaining P/N (116–119)
+  116: ['Malad East (N)', 'Jankalyan Nagar', 'Valnai'],
+  117: ['Kandivali East (N)', 'Mahakali Caves area', 'Phadke Road'],
+  118: ['Poisar (N)', 'Kandivali Station (E)', 'Pathanwadi'],
+  119: ['Charkop (N)', 'Sector 4-5 Charkop', 'Eksar (N)'],
+  // Remaining P/S (120–123)
+  120: ['Goregaon East (N)', 'Cine Planet area', 'Jay Coach'],
+  121: ['Film City (N)', 'Aarey Milk Colony', 'Goregaon (far E)'],
+  122: ['Malad West (N)', 'Kharodi', 'Manori Road'],
+  123: ['Malvani', 'Marve', 'Madh Island approach'],
+  // Remaining R/C (124–126)
+  124: ['Kandivali West (S)', 'Charkop (W)', 'Thakur Complex'],
+  125: ['Borivali West (S)', 'Mandapeshwar (S)', 'Eksar (S)'],
+  126: ['Dahisar (S) border', 'New Nagari Sahakari', 'Dahisar Naka'],
+  // Remaining R/N (127–129)
+  127: ['Dahisar East (S)', 'Rawalpada (S)', 'Penkarpada'],
+  128: ['Anand Nagar Dahisar (S)', 'Checknaka (S)', 'SP Nagar'],
+  129: ['Borivali North (S)', 'Nutan Nagar', 'Tata Garden'],
+  // Remaining R/S (130–132)
+  130: ['IC Colony (S)', 'Chandavarkar Road', 'Dhanukar Wadi'],
+  131: ['Shimpoli (S)', 'Poisar (S-2)', 'New Mhada (S)'],
+  132: ['Borivali SW', 'Western Express Highway (B)', 'SV Road (S)'],
+  // K/E extras (133, 150, 151, 178, 179, 207)
+  133: ['Sakinaka (S)', 'Mohili Village', 'Marol Naka'],
+  150: ['Kurla East (S)', 'Vaze Colony', 'Shramik Nagar'],
+  151: ['Kurla East (far)', 'Anand Nagar Kurla', 'Rajiv Gandhi Nagar Kurla'],
+  178: ['MIDC Marol (S)', 'Marol Military Road (S)', 'Chakala (S)'],
+  179: ['JB Nagar (S)', 'Nehru Nagar Andheri (S)', 'Andheri Kurla Road'],
+  207: ['Sakinaka (N)', 'Gavanpada', 'Trombay Road (N)'],
+  // B extras (134–136)
+  134: ['Nagpada (E)', 'Agripada (E)', 'Bhim Chowk'],
+  135: ['Byculla (N)', 'Mazagaon Dock area', 'Dockyard colony'],
+  136: ['Masjid (E)', 'Mohammed Ali Road (N)', 'Musafirkhana (E)'],
+  // C extras (137–138)
+  137: ['Kalbadevi (S)', 'Zaveri Bazaar', 'Sheikh Memon St'],
+  138: ['Pydhonie (E)', 'Bhendi Bazaar (N)', 'Mandvi (E)'],
+  // E extras (139–140, 201)
+  139: ['Byculla (W)', 'Kamathipura (S)', 'Nagpada (S)'],
+  140: ['Sewri (S)', 'Antop Hill (S)', 'Hay Bunder'],
+  201: ['Reay Road (S)', 'NM Joshi Marg (S)', 'Ambewadi'],
+  // F/N extras (141–142, 202)
+  141: ['Sion (S)', 'Matunga Labour Camp', 'Dharavi border F/N'],
+  142: ['Dharavi (centre)', 'Kumbharwada', 'Muslim Society Dharavi'],
+  202: ['Wadala (W)', 'Anik Village', 'Sewri (N)'],
+  // F/S extras (143, 169, 170, 203)
+  143: ['Naigaon (E)', 'Kamathipura', 'Falkland Road'],
+  169: ['Lower Parel (S)', 'Senapati Bapat Marg (S)', 'Siddhivinayak area'],
+  170: ['Worli Koliwada', 'Dr Annie Besant Road', 'Century Rayon'],
+  203: ['Parel (S)', 'Ganesh Nagar (S)', 'Bhoiwada'],
+  // G/N extras (144, 171, 199, 200)
+  144: ['Dadar (E)', 'Naigaon East', 'Pant Nagar Dadar'],
+  171: ['Mahim (N)', 'Bandra Terminus (N)', 'Kherwadi border'],
+  199: ['Dharavi (SW)', 'Sion-Bandra junction', 'Dharavi main Rd'],
+  200: ['Mahim (S)', 'Sitladevi Temple area', 'SV Road Mahim'],
+  // G/S extras (145, 172, 173, 204)
+  145: ['Worli (S)', 'Jacob Circle', 'Haji Ali area'],
+  172: ['Prabhadevi (S)', 'Veer Savarkar Marg', 'Elphinstone (S)'],
+  173: ['Worli Village', 'Atria (S)', 'Worli sea link end'],
+  204: ['Prabhadevi (N)', 'Gokhale Road (N)', 'Sitladevi (N)'],
+  // H/E extras (146–147, 174, 175, 205)
+  146: ['Bandra East (N)', 'Bandra Reclamation', 'BKC (N)'],
+  147: ['Santacruz East (N)', 'Kole Kalyan', 'MTNL building area'],
+  174: ['Khar East (N)', 'Kranti Nagar (N)', 'CSIA road'],
+  175: ['Dharavi (NE)', 'CST Road (N)', 'Kalanagar (N)'],
+  205: ['Vakola (N)', 'Vile Parle East border', 'Nehru Road (N)'],
+  // H/W extras (148–149, 176, 177, 206)
+  148: ['Bandra West (N)', 'Pali Naka', 'St Andrews'],
+  149: ['Khar West (N)', 'Turner Road', 'Hill Road (N)'],
+  176: ['Santacruz West (N)', 'Vile Parle West border', 'SV Road (KW-N)'],
+  177: ['Juhu (N)', 'JVPD (N)', 'Andheri-Juhu Road'],
+  206: ['Reclamation (N)', 'Carter Road (N)', 'Bandstand'],
+  // K/W extras (152–153, 180, 208)
+  152: ['Andheri West (S)', 'DN Nagar (S)', 'Gilbert Hill (S)'],
+  153: ['Oshiwara (S)', 'Lokhandwala (S)', 'Andheri Market (S)'],
+  180: ['Versova (S)', 'Four Bungalows (S)', 'Andheri West Station'],
+  208: ['Jogeshwari West (S)', 'Motilal Nagar (S)', 'Goregaon border'],
+  // L extras (154–156, 181, 182, 209, 210)
+  154: ['Kurla West (N)', 'Bharat Nagar (N)', 'Wadi (N)'],
+  155: ['Saki Naka (N)', 'Chandivali (N)', 'Powai border'],
+  156: ['Chunabhatti (N)', 'LBS Marg Kurla (S)', 'Ghatkopar border'],
+  181: ['Kanjurmarg (N)', 'Sonapur (N)', 'Nahur (N)'],
+  182: ['Powai (N)', 'Hiranandani (N)', 'Saki Vihar (N)'],
+  209: ['Kurla East (N)', 'Tilak Nagar Kurla (N)', 'Sion Panvel Hwy Kurla'],
+  210: ['Vikhroli West (N)', 'Tagore Nagar border', 'LBS Marg junction'],
+  // M/E extras (157–158, 165–167, 185–187, 198, 211, 212)
+  157: ['Govandi (N)', 'Shivaji Nagar (N)', 'Baiganwadi (N)'],
+  158: ['Mankhurd (N)', 'Natwar Parekh (N)', 'Deonar (N)'],
+  165: ['Trombay (N)', 'Chembur Colony (N)', 'Anushakti (N)'],
+  166: ['Govandi (S)', 'Mahul Village (N)', 'Rafiq Nagar (N)'],
+  167: ['Deonar (S)', 'Asalfa (N)', 'Ramabai (N)'],
+  185: ['Govandi (E)', 'M/East far boundary', 'Pratikhsa Nagar'],
+  186: ['Mankhurd (S)', 'Tata Colony (N)', 'Timber Depot'],
+  187: ['Chembur (N)', 'RCF (N)', 'Trombay Village'],
+  198: ['Govandi (W)', 'Sangharsh Nagar', 'Indira Nagar Govandi'],
+  211: ['Mankhurd (E)', 'Deonar (E)', 'Dr Babasaheb Nagar'],
+  212: ['Govandi Station area', 'Baiganwadi (E)', 'Shramik Nagar Govandi'],
+  // M/W extras (159–162, 168, 183, 184, 196, 197, 213)
+  159: ['Chembur (S)', 'Tilak Nagar (S)', 'Suman Nagar (S)'],
+  160: ['Sion Koliwada (S)', 'Pratiksha Nagar (S)', 'Chunabhatti (S)'],
+  161: ['Mahul (N)', 'Ambapada (N)', 'Trombay Rd (N)'],
+  162: ['Chembur (W)', 'Diamond Garden (W)', 'RCF Colony (W)'],
+  168: ['Tilak Nagar (N)', 'Suman Nagar (N)', 'Chembur Naka'],
+  183: ['Sion Koliwada (N)', 'LBS Marg Chembur', 'Pratiksha (N)'],
+  184: ['Mahul (S)', 'Ambapada (S)', 'ONGC colony'],
+  196: ['Chembur East', 'Basant Park', 'EEH Service Road'],
+  197: ['Ghatkopar-Chembur border', 'Vidyadhar Nagar', 'Priyadarshini Nagar'],
+  213: ['Chunabhatti (M/W)', 'Dharavi boundary M/W', 'Kherwadi S'],
+  // N extras (112–115, 163–164, 188–189, 214–215)
+  163: ['Ghatkopar East (S)', 'Ramabai (S)', 'Saki Naka (S)'],
+  164: ['Vikhroli East (S)', 'Tagore Nagar (E)', 'Pirojshanagar'],
+  188: ['Ghatkopar West (S)', 'Pant Nagar (S)', 'LBS junction'],
+  189: ['Rajawadi (S)', 'Vidya Vihar (S)', 'Hingwala Lane (S)'],
+  214: ['Gandhi Nagar GK (S)', 'Tilak Nagar GK (S)', 'Ghatkopar N border'],
+  215: ['Ghatkopar (far N)', 'Vikhroli (far N)', 'Kirol Road'],
+  // P/N extras (116–119, 216)
+  216: ['Kandivali East (far N)', 'Thakur Complex (N)', 'Valmiki Nagar'],
+  // P/S extras (120–123, 190, 191, 217)
+  190: ['Goregaon East (S)', 'Jay Coach (S)', 'Aarey (S)'],
+  191: ['Malad West (S)', 'Orlem (S)', 'Marve Road (S)'],
+  217: ['Malvani (S)', 'Malad (W) far', 'Jankalyan (S)'],
+  // R/C extras (124–126, 192, 218)
+  192: ['Kandivali West (N)', 'Charkop (N-W)', 'Thakur (N)'],
+  218: ['Borivali West (N)', 'Mandapeshwar (N)', 'Eksar (N)'],
+  // R/N extras (127–129, 193–194, 219)
+  193: ['Dahisar East (N)', 'Rawalpada (N)', 'Francis Bunder Dahisar'],
+  194: ['Borivali North (N)', 'Nutan Nagar (N)', 'Poisar (N)'],
+  219: ['Anand Nagar Dahisar (N)', 'Dahisar Checknaka (N)', 'SP Nagar (N)'],
+  // R/S extras (130–132, 195, 220)
+  195: ['IC Colony (N)', 'Chandavarkar (N)', 'Borivali SW (N)'],
+  220: ['Borivali (W) Station area', 'Vazira Naka (N)', 'Dhanukar Wadi (N)'],
+  // A extras (225–227)
+  225: ['Colaba (S)', 'Back Bay (S)', 'Afghan Church area (S)'],
+  226: ['Cuffe Parade (S)', 'WTC (S)', 'Maker Towers'],
+  227: ['Nariman Point (S)', 'Marine Lines (S)', 'Churchgate Station area'],
+  // S extras (221–223)
+  221: ['Vikhroli East (N)', 'Godrej (N)', 'Pipe Road (N)'],
+  222: ['Bhandup West (N)', 'LBS (N)', 'Sonapur (N-2)'],
+  223: ['Kanjurmarg (E)', 'Bhandup (E)', 'Nahur (E)'],
+  // T extras (224)
+  224: ['Mulund (E) far', 'Nahur (E)', 'Navi Mumbai border'],
+};
+
+// Lookup: get micro-areas for a given prabhag ward number
+export function getMicroAreasByWardNo(wardNo: number): string[] {
+  return PRABHAG_MICRO_AREAS[wardNo] ?? [];
+}
+
 // Lookup: get all prabhags for a given admin ward key
 export function getPrabhagsByAdminWard(adminWard: string): PrabhagInfo[] {
   return MUMBAI_PRABHAGS.filter((p) => p.admin_ward === adminWard);
@@ -305,7 +600,6 @@ export const PARTY_COLOR: Record<string, { bg: string; text: string; border: str
 };
 
 export function getPartyStyle(party: string) {
-  // Normalize common variants
   const key = party.replace('Nationalist Congress Sharadchandra Pawar', 'NCP (SP)')
                    .replace('Nationalist Congress Party (NCP)', 'NCP')
                    .replace('Nationalist Congress Party', 'NCP')
