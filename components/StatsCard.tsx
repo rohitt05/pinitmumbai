@@ -167,20 +167,19 @@ function WardCard({ top, area }: { top: number; area: AreaInfo }) {
                   {p.ward_no}
                 </div>
 
-                {/* Corporator info */}
+                {/* Nagar Sevak info */}
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{
                     fontSize: 11, fontWeight: 700, color: '#1e293b',
                     whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                    lineHeight: 1.2,
+                    lineHeight: 1.3,
                   }}>
-                    {p.corporator}
+                    {p.candidate}
                   </div>
                   <div style={{
-                    fontSize: 10, color: '#64748b', marginTop: 1,
-                    whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                    fontSize: 10, color: '#94a3b8', marginTop: 1, fontWeight: 500,
                   }}>
-                    {p.name}
+                    Ward {p.ward_no}
                   </div>
                 </div>
 
