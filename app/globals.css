@@ -4,9 +4,7 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --font: 'Inter', -apple-system, sans-serif;
-}
+:root { --font: 'Inter', -apple-system, sans-serif; }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -20,7 +18,7 @@ html, body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ── Leaflet base ─────────────────────────────────────── */
+/* ── Leaflet ─────────────────────────────────────── */
 .leaflet-container {
   width: 100% !important;
   height: 100% !important;
@@ -29,7 +27,7 @@ html, body {
   background: #f8fafc !important;
 }
 
-/* ── Hide default leaflet cluster CSS completely ─────── */
+/* Suppress default cluster styles so our custom icons render clean */
 .leaflet-cluster-anim .leaflet-marker-icon,
 .leaflet-cluster-anim .leaflet-marker-shadow { transition: none !important; }
 .marker-cluster-small,
@@ -37,9 +35,13 @@ html, body {
 .marker-cluster-large,
 .marker-cluster-small div,
 .marker-cluster-medium div,
-.marker-cluster-large div { background: transparent !important; box-shadow: none !important; }
+.marker-cluster-large div {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+}
 
-/* ── Zoom controls ───────────────────────────────────── */
+/* Hide default leaflet zoom (we use our own) */
 .leaflet-control-zoom { display: none !important; }
 
 /* ── Popup ───────────────────────────────────────────── */
@@ -59,31 +61,11 @@ html, body {
   background: rgba(255,255,255,0.85) !important;
   color: #374151 !important;
   font-size: 14px !important;
-  display: flex !important; align-items: center !important; justify-content: center !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   z-index: 10 !important;
 }
-
-/* ── Ward hover tooltip ──────────────────────────────── */
-.ward-tooltip {
-  background: white !important;
-  border: none !important;
-  border-radius: 12px !important;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.14) !important;
-  padding: 0 !important;
-  pointer-events: none !important;
-  white-space: nowrap !important;
-}
-.ward-tooltip::before { display: none !important; }
-
-/* ── Area name labels ────────────────────────────────── */
-.area-label {
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  padding: 0 !important;
-  white-space: nowrap !important;
-}
-.area-label::before { display: none !important; }
 
 /* ── Animations ──────────────────────────────────────── */
 @keyframes pulse-dot {
@@ -97,11 +79,14 @@ html, body {
   80% { transform: scale(0.95); }
   100% { transform: scale(1); opacity: 1; }
 }
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
 
 .animate-pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
-.animate-spin       { animation: spin 0.8s linear infinite; }
-.animate-bounce-in  { animation: bounce-in 0.4s cubic-bezier(0.175,0.885,0.32,1.275) forwards; }
+.animate-spin      { animation: spin 0.8s linear infinite; }
+.animate-bounce-in { animation: bounce-in 0.4s cubic-bezier(0.175,0.885,0.32,1.275) forwards; }
 
-/* ── Scrollbar hidden ────────────────────────────────── */
 ::-webkit-scrollbar { display: none; }
 * { scrollbar-width: none; }

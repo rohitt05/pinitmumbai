@@ -14,18 +14,17 @@ interface FilterBarProps {
 const ALL = { id: 'all', label: 'All', emoji: '', color: '#0f172a' };
 const ITEMS = [ALL, ...CATEGORIES];
 
-export default function FilterBar({ active, onChange, totalReports, onOpenModal }: FilterBarProps) {
+export default function FilterBar({ active, onChange, totalReports }: FilterBarProps) {
   return (
     <div style={{ fontFamily: 'Inter, sans-serif', background: 'white' }}>
 
-      {/* ━━ Row 1: Wordmark + social icon ━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+      {/* Row 1: Wordmark + live pill */}
       <div style={{
         display: 'flex', alignItems: 'center',
         justifyContent: 'space-between',
         padding: '0 20px', height: 56,
         borderBottom: '1px solid rgba(0,0,0,0.06)',
       }}>
-        {/* Wordmark */}
         <div style={{ display: 'flex', alignItems: 'baseline' }}>
           <span style={{
             fontSize: 22, fontWeight: 800, color: '#0f172a',
@@ -72,31 +71,23 @@ export default function FilterBar({ active, onChange, totalReports, onOpenModal 
           }}>v1.0</span>
         </div>
 
-        {/* Right: live pill + icon */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: 5,
-            background: 'rgba(239,68,68,0.07)', border: '1px solid #fca5a5',
-            borderRadius: 999, padding: '4px 10px',
-          }}>
-            <span style={{
-              width: 6, height: 6, borderRadius: '50%',
-              background: '#ef4444', display: 'inline-block',
-            }} className="animate-pulse-dot" />
-            <span style={{ fontSize: 11, fontWeight: 600, color: '#ef4444' }}>
-              {totalReports} live
-            </span>
-          </div>
-          <button style={{
-            width: 34, height: 34, borderRadius: '50%',
-            border: '1.5px solid #e5e7eb', background: 'white',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: 'pointer', fontSize: 15, color: '#374151',
-          }}>📸</button>
+        {/* Live pill only — no camera icon */}
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 5,
+          background: 'rgba(239,68,68,0.07)', border: '1px solid #fca5a5',
+          borderRadius: 999, padding: '4px 10px',
+        }}>
+          <span style={{
+            width: 6, height: 6, borderRadius: '50%',
+            background: '#ef4444', display: 'inline-block',
+          }} className="animate-pulse-dot" />
+          <span style={{ fontSize: 11, fontWeight: 600, color: '#ef4444' }}>
+            {totalReports} live
+          </span>
         </div>
       </div>
 
-      {/* ━━ Row 2: Category filter chips + Map/List toggle ━━━━━━━━━━━━ */}
+      {/* Row 2: Category chips + Map/List toggle */}
       <div style={{
         display: 'flex', alignItems: 'center',
         justifyContent: 'space-between',
@@ -104,7 +95,6 @@ export default function FilterBar({ active, onChange, totalReports, onOpenModal 
         borderBottom: '1px solid rgba(0,0,0,0.06)',
         gap: 8,
       }}>
-        {/* Chips — scrollable */}
         <div style={{
           display: 'flex', alignItems: 'center', gap: 5,
           overflowX: 'auto', scrollbarWidth: 'none', flex: 1,
@@ -128,7 +118,7 @@ export default function FilterBar({ active, onChange, totalReports, onOpenModal 
                     cursor: 'pointer', fontFamily: 'Inter, sans-serif',
                     whiteSpace: 'nowrap', zIndex: 1,
                     letterSpacing: '-0.005em',
-                    transition: 'color 150ms ease, border-color 150ms ease',
+                    transition: 'color 150ms ease',
                   }}
                 >
                   {isActive && (
@@ -150,7 +140,6 @@ export default function FilterBar({ active, onChange, totalReports, onOpenModal 
           </LayoutGroup>
         </div>
 
-        {/* Map / List toggle */}
         <div style={{
           display: 'flex', alignItems: 'center',
           border: '1px solid #e5e7eb', borderRadius: 8,
