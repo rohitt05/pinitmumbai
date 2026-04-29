@@ -3,15 +3,16 @@
 import { useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
+import 'leaflet.markercluster/dist/MarkerCluster.css';
+import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 import L from 'leaflet';
+import 'leaflet.markercluster';
 import { Report } from '@/types/report';
 import { getCategoryById } from '@/lib/categories';
 import { supabase } from '@/lib/supabase';
 import HotspotLayer from './HotspotLayer';
-import { renderToString } from 'react-dom/server';
-import PinPopup from './PinPopup';
 
-// Fix default icon paths
+// Fix Leaflet default marker icon broken in webpack/next
 delete (L.Icon.Default.prototype as unknown as Record<string, unknown>)._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
@@ -19,20 +20,52 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 });
 
-const MUMBAI = { lat: 19.2183, lng: 72.9781 };
+const MUMBAI: [number, number] = [19.2183, 72.9781];
 
 function createCategoryIcon(color: string, emoji: string) {
   return L.divIcon({
     className: '',
-    html: `<div style="
-      width:32px;height:32px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);
-      background:${color};border:2px solid white;
-      box-shadow:0 2px 6px rgba(0,0,0,0.25);display:flex;align-items:center;justify-content:center;
-    "><span style="transform:rotate(45deg);font-size:14px;line-height:32px;display:block;text-align:center;">${emoji}</span></div>`,
-    iconSize: [32, 32],
-    iconAnchor: [16, 32],
-    popupAnchor: [0, -36],
+    html: `<div style="width:34px;height:34px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:${color};border:2px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;"><span style="transform:rotate(45deg);font-size:15px;display:block;text-align:center;line-height:30px;">${emoji}</span></div>`,
+    iconSize: [34, 34],
+    iconAnchor: [17, 34],
+    popupAnchor: [0, -38],
   });
+}
+
+function buildPopupHTML(report: Report): string {
+  const cat = getCategoryById(report.category);
+  const timeAgo = getTimeAgo(report.created_at);
+  return `
+    <div style="width:260px;font-family:Inter,sans-serif;">
+      <img src="${report.photo_url}" alt="report" style="width:100%;height:160px;object-fit:cover;display:block;" />
+      <div style="padding:10px 12px;">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+          <span style="font-size:18px;">${cat?.emoji ?? '📍'}</span>
+          <span style="font-weight:700;font-size:14px;color:${cat?.color ?? '#374151'};">${cat?.label ?? report.category}</span>
+        </div>
+        ${report.description ? `<p style="margin:4px 0;font-size:13px;color:#374151;line-height:1.4;">${report.description}</p>` : ''}
+        ${report.area_name ? `<p style="margin:2px 0;font-size:12px;color:#6b7280;">📍 ${report.area_name}</p>` : ''}
+        <div style="margin-top:8px;display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:11px;color:#9ca3af;">${timeAgo}</span>
+          <button
+            data-report-id="${report.id}"
+            data-upvotes="${report.upvotes}"
+            style="background:#fef2f2;border:1px solid #fca5a5;border-radius:999px;padding:4px 12px;font-size:13px;font-weight:600;cursor:pointer;color:#ef4444;"
+          >👍 ${report.upvotes}</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function getTimeAgo(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  return `${Math.floor(hrs / 24)}d ago`;
 }
 
 interface MapInnerProps {
@@ -45,20 +78,28 @@ interface MapInnerProps {
 function MapInner({ reports, activeCategory, showHeatmap, onNewReport }: MapInnerProps) {
   const map = useMap();
   const clusterGroupRef = useRef<L.MarkerClusterGroup | null>(null);
-  const markersRef = useRef<Map<string, L.Marker>>(new Map());
 
-  // Init cluster group
+  // Init cluster group once
   useEffect(() => {
-    const L2 = require('leaflet');
-    require('leaflet.markercluster');
-    // @ts-expect-error - markerClusterGroup added by plugin
-    const group: L.MarkerClusterGroup = L2.markerClusterGroup({
+    const group = L.markerClusterGroup({
       chunkedLoading: true,
       maxClusterRadius: 60,
+      iconCreateFunction: (cluster) => {
+        const count = cluster.getChildCount();
+        const size = count < 10 ? 36 : count < 50 ? 44 : 52;
+        const bg = count < 10 ? '#F97316' : count < 50 ? '#EF4444' : '#991B1B';
+        return L.divIcon({
+          html: `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${bg};border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:13px;font-family:Inter,sans-serif;">${count}</div>`,
+          className: '',
+          iconSize: [size, size],
+        });
+      },
     });
     clusterGroupRef.current = group;
     map.addLayer(group);
-    return () => { map.removeLayer(group); };
+    return () => {
+      map.removeLayer(group);
+    };
   }, [map]);
 
   // Sync markers when reports or filter changes
@@ -66,59 +107,65 @@ function MapInner({ reports, activeCategory, showHeatmap, onNewReport }: MapInne
     const group = clusterGroupRef.current;
     if (!group) return;
     group.clearLayers();
-    markersRef.current.clear();
 
-    const filtered = activeCategory === 'all'
-      ? reports
-      : reports.filter((r) => r.category === activeCategory);
+    const filtered =
+      activeCategory === 'all'
+        ? reports
+        : reports.filter((r) => r.category === activeCategory);
 
     filtered.forEach((report) => {
       const cat = getCategoryById(report.category);
       if (!cat) return;
       const icon = createCategoryIcon(cat.color, cat.emoji);
       const marker = L.marker([report.lat, report.lng], { icon });
-      marker.bindPopup(
-        renderToString(<PinPopup report={report} />),
-        { maxWidth: 280, className: 'pinitpopup' }
+      const popup = L.popup({ maxWidth: 280, className: 'pinit-popup' }).setContent(
+        buildPopupHTML(report)
       );
-      // Re-bind events after popup opens to handle upvote button
+      marker.bindPopup(popup);
+
+      // Wire upvote button after popup DOM is inserted
       marker.on('popupopen', () => {
-        const container = marker.getPopup()?.getElement();
-        if (!container) return;
-        const btn = container.querySelector('button');
-        if (btn) {
-          btn.addEventListener('click', async () => {
-            btn.disabled = true;
-            const countEl = btn;
-            const currentText = countEl.textContent || '';
-            const currentCount = parseInt(currentText.replace(/[^0-9]/g, '')) || 0;
-            countEl.textContent = `👍 ${currentCount + 1}`;
-            await fetch('/api/upvote', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ id: report.id }),
-            });
+        const el = marker.getPopup()?.getElement();
+        if (!el) return;
+        const btn = el.querySelector<HTMLButtonElement>('button[data-report-id]');
+        if (!btn) return;
+        btn.addEventListener('click', async () => {
+          if (btn.dataset.voted) return;
+          btn.dataset.voted = '1';
+          const current = parseInt(btn.dataset.upvotes ?? '0');
+          btn.textContent = `👍 ${current + 1}`;
+          btn.style.color = '#9ca3af';
+          btn.style.borderColor = '#e5e7eb';
+          await fetch('/api/upvote', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: report.id }),
           });
-        }
+        });
       });
+
       group.addLayer(marker);
-      markersRef.current.set(report.id, marker);
     });
   }, [reports, activeCategory]);
 
-  // Supabase Realtime
+  // Supabase Realtime — new pin appears instantly
   useEffect(() => {
     const channel = supabase
       .channel('reports-realtime')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'reports' }, (payload) => {
-        const newReport = payload.new as Report;
-        onNewReport(newReport);
-      })
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'reports' },
+        (payload) => {
+          onNewReport(payload.new as Report);
+        }
+      )
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [onNewReport]);
 
-  // GPS re-center
+  // GPS re-center on load
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
       (pos) => map.setView([pos.coords.latitude, pos.coords.longitude], 14),
@@ -139,13 +186,13 @@ interface MapProps {
 export default function Map(props: MapProps) {
   return (
     <MapContainer
-      center={[MUMBAI.lat, MUMBAI.lng]}
+      center={MUMBAI}
       zoom={13}
       style={{ width: '100vw', height: '100dvh' }}
       zoomControl={false}
     >
       <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       <MapInner {...props} />

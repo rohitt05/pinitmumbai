@@ -1,8 +1,11 @@
 'use client';
 
+// PinPopup is kept as a React component for use in the ReportModal success preview.
+// Inside the Leaflet map, popup HTML is generated via buildPopupHTML() in Map.tsx
+// to avoid renderToString issues with hooks.
+
 import { Report } from '@/types/report';
 import { getCategoryById } from '@/lib/categories';
-import { formatDistanceToNow } from 'date-fns';
 import { useState } from 'react';
 
 interface PinPopupProps {
@@ -45,16 +48,9 @@ export default function PinPopup({ report }: PinPopupProps) {
         {report.area_name && (
           <p style={{ margin: '2px 0', fontSize: 12, color: '#6b7280' }}>📍 {report.area_name}</p>
         )}
-        <div
-          style={{
-            marginTop: 8,
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}
-        >
+        <div style={{ marginTop: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span style={{ fontSize: 11, color: '#9ca3af' }}>
-            {formatDistanceToNow(new Date(report.created_at), { addSuffix: true })}
+            {new Date(report.created_at).toLocaleDateString()}
           </span>
           <button
             onClick={handleUpvote}
@@ -62,10 +58,8 @@ export default function PinPopup({ report }: PinPopupProps) {
             style={{
               background: voted ? '#f3f4f6' : '#fef2f2',
               border: `1px solid ${voted ? '#e5e7eb' : '#fca5a5'}`,
-              borderRadius: 999,
-              padding: '4px 12px',
-              fontSize: 13,
-              fontWeight: 600,
+              borderRadius: 999, padding: '4px 12px',
+              fontSize: 13, fontWeight: 600,
               cursor: voted ? 'default' : 'pointer',
               color: voted ? '#9ca3af' : '#ef4444',
             }}
