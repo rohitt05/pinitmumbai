@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { MapContainer, TileLayer, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -9,7 +9,6 @@ import { Report } from '@/types/report';
 import { getCategoryById } from '@/lib/categories';
 import { supabase } from '@/lib/supabase';
 import HotspotLayer from './HotspotLayer';
-import StatsCard from './StatsCard';
 
 delete (L.Icon.Default.prototype as unknown as Record<string, unknown>)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -21,7 +20,7 @@ L.Icon.Default.mergeOptions({
 const MUMBAI: [number, number] = [19.15, 72.94];
 const INITIAL_ZOOM = 10;
 
-const MUMBAI_AREAS = [
+export const MUMBAI_AREAS = [
   { name: 'Colaba',       lat: 18.9067, lng: 72.8147, ward: 'A',   direction: 'South',   zone: 'City' },
   { name: 'Churchgate',   lat: 18.9322, lng: 72.8264, ward: 'C',   direction: 'South',   zone: 'City' },
   { name: 'Dadar',        lat: 19.0178, lng: 72.8478, ward: 'G/N', direction: 'Central', zone: 'City' },
@@ -43,6 +42,8 @@ const MUMBAI_AREAS = [
   { name: 'Lower Parel',  lat: 18.9936, lng: 72.8258, ward: 'G/S', direction: 'South',   zone: 'City' },
   { name: 'Navi Mumbai',  lat: 19.0330, lng: 73.0297, ward: 'NM',  direction: 'East',    zone: 'Navi Mumbai' },
 ];
+
+export type AreaInfo = typeof MUMBAI_AREAS[0] & { count: number };
 
 function createCategoryIcon(color: string, emoji: string) {
   return L.divIcon({
@@ -94,8 +95,6 @@ function buildPopupHTML(report: Report): string {
     </div>
   </div>`;
 }
-
-type AreaInfo = typeof MUMBAI_AREAS[0] & { count: number };
 
 interface MapInnerProps {
   reports: Report[];
@@ -169,7 +168,6 @@ function MapInner({ reports, activeCategory, showHeatmap, onNewReport, onAreaHov
     });
   }, [reports, activeCategory]);
 
-  // Area labels + hover zones (calls onAreaHover instead of tooltip)
   useEffect(() => {
     areaLayersRef.current.forEach((l) => map.removeLayer(l));
     areaLayersRef.current = [];
@@ -181,7 +179,6 @@ function MapInner({ reports, activeCategory, showHeatmap, onNewReport, onAreaHov
         return Math.sqrt(dLat * dLat + dLng * dLng) < 0.018;
       }).length;
 
-      // Permanent area name label
       const labelMarker = L.marker([area.lat, area.lng], {
         icon: L.divIcon({
           className: '',
@@ -193,7 +190,6 @@ function MapInner({ reports, activeCategory, showHeatmap, onNewReport, onAreaHov
         pane: 'tooltipPane',
       } as L.MarkerOptions);
 
-      // Invisible hover zone — fires onAreaHover
       const hoverMarker = L.marker([area.lat, area.lng], {
         icon: L.divIcon({
           className: '',
@@ -233,57 +229,15 @@ function MapInner({ reports, activeCategory, showHeatmap, onNewReport, onAreaHov
   return <HotspotLayer reports={reports} visible={showHeatmap} />;
 }
 
-// ── Ward hover card — fixed to right edge below zoom controls ──
-type AreaInfo = typeof MUMBAI_AREAS[0] & { count: number };
-
-function WardCard({ area }: { area: AreaInfo }) {
-  const intensity = area.count === 0 ? 'No issues' : area.count < 3 ? 'Low' : area.count < 8 ? 'Moderate' : 'High';
-  const ic = area.count === 0 ? '#94a3b8' : area.count < 3 ? '#22c55e' : area.count < 8 ? '#f97316' : '#ef4444';
-  return (
-    <div style={{
-      background: 'white',
-      borderRadius: 14,
-      boxShadow: '0 4px 24px rgba(0,0,0,0.14)',
-      border: '1px solid rgba(0,0,0,0.06)',
-      padding: '14px 16px',
-      minWidth: 186,
-      fontFamily: 'Inter, sans-serif',
-      animation: 'slide-in-right 0.2s ease',
-    }}>
-      <div style={{ fontSize: 14, fontWeight: 800, color: '#0f172a', letterSpacing: '-0.03em', marginBottom: 2 }}>
-        {area.name}
-      </div>
-      <div style={{ fontSize: 11, color: '#94a3b8', fontWeight: 500, marginBottom: 12 }}>
-        Ward #{area.ward} &nbsp;·&nbsp; {area.direction}
-      </div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 10, borderTop: '1px solid #f1f5f9' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <span style={{ fontSize: 22, fontWeight: 800, color: '#ef4444', letterSpacing: '-0.04em', lineHeight: 1 }}>
-            {area.count}
-          </span>
-          <span style={{ fontSize: 10, fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-            reports
-          </span>
-        </div>
-        <span style={{
-          fontSize: 11, fontWeight: 700, color: ic,
-          background: `${ic}18`, padding: '4px 10px',
-          borderRadius: 999,
-        }}>{intensity}</span>
-      </div>
-      <div style={{ fontSize: 10, color: '#cbd5e1', marginTop: 6 }}>{area.zone} Zone</div>
-    </div>
-  );
-}
-
 interface MapProps extends Omit<MapInnerProps, 'onAreaHover'> {
   totalReports: number;
+  navbarHeight: number;
+  onAreaHover: (area: AreaInfo | null) => void;
 }
 
-export default function Map({ totalReports, ...props }: MapProps) {
+export default function Map({ totalReports, navbarHeight, onAreaHover, ...props }: MapProps) {
   const mapRef = useRef<L.Map | null>(null);
-  const [hoveredArea, setHoveredArea] = useState<AreaInfo | null>(null);
-  const handleAreaHover = useCallback((a: AreaInfo | null) => setHoveredArea(a), []);
+  const handleAreaHover = useCallback((a: AreaInfo | null) => onAreaHover(a), [onAreaHover]);
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
@@ -303,48 +257,36 @@ export default function Map({ totalReports, ...props }: MapProps) {
         <MapInner {...props} onAreaHover={handleAreaHover} />
       </MapContainer>
 
-      {/* Right-edge column: zoom + ward card */}
+      {/* Zoom controls — fixed right edge, below navbar */}
       <div style={{
-        position: 'absolute',
-        top: 16,
+        position: 'fixed',
+        top: navbarHeight + 16,
         right: 16,
-        zIndex: 500,
+        zIndex: 900,
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'flex-end',
-        gap: 10,
+        boxShadow: '0 2px 12px rgba(0,0,0,0.12)',
+        borderRadius: 10,
+        overflow: 'hidden',
+        border: '1px solid #e5e7eb',
       }}>
-        {/* Zoom controls */}
-        <div style={{
-          display: 'flex', flexDirection: 'column',
-          boxShadow: '0 2px 12px rgba(0,0,0,0.12)',
-          borderRadius: 10, overflow: 'hidden',
-          border: '1px solid #e5e7eb',
-        }}>
-          <button
-            onClick={() => mapRef.current?.zoomIn()}
-            style={{
-              width: 38, height: 38, background: 'white', border: 'none',
-              borderBottom: '1px solid #f1f5f9',
-              fontSize: 20, cursor: 'pointer', color: '#374151',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontWeight: 300, lineHeight: 1,
-            }}>+</button>
-          <button
-            onClick={() => mapRef.current?.zoomOut()}
-            style={{
-              width: 38, height: 38, background: 'white', border: 'none',
-              fontSize: 20, cursor: 'pointer', color: '#374151',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontWeight: 300, lineHeight: 1,
-            }}>−</button>
-        </div>
-
-        {/* Stats card */}
-        <StatsCard totalReports={totalReports} activeReports={totalReports} />
-
-        {/* Ward hover card — appears below stats when hovering an area */}
-        {hoveredArea && <WardCard area={hoveredArea} />}
+        <button
+          onClick={() => mapRef.current?.zoomIn()}
+          style={{
+            width: 38, height: 38, background: 'white', border: 'none',
+            borderBottom: '1px solid #f1f5f9',
+            fontSize: 20, cursor: 'pointer', color: '#374151',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontWeight: 300, lineHeight: 1,
+          }}>+</button>
+        <button
+          onClick={() => mapRef.current?.zoomOut()}
+          style={{
+            width: 38, height: 38, background: 'white', border: 'none',
+            fontSize: 20, cursor: 'pointer', color: '#374151',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontWeight: 300, lineHeight: 1,
+          }}>−</button>
       </div>
     </div>
   );
