@@ -3,6 +3,7 @@
 import { useRef, useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AreaInfo } from './Map';
+import { getPrabhagsByAdminWard, getPartyStyle } from '@/lib/mumbai-wards';
 
 interface StatsCardProps {
   totalReports: number;
@@ -12,6 +13,9 @@ interface StatsCardProps {
 }
 
 function WardCard({ top, area }: { top: number; area: AreaInfo }) {
+  const isConstituency = area.zone === 'Assembly Constituency';
+  const prabhags = isConstituency ? [] : getPrabhagsByAdminWard(area.ward);
+
   const intensity =
     area.count === 0 ? 'No issues' :
     area.count < 3  ? 'Low' :
@@ -31,7 +35,7 @@ function WardCard({ top, area }: { top: number; area: AreaInfo }) {
         position: 'fixed',
         top,
         left: 16,
-        width: 224,
+        width: 248,
         zIndex: 900,
         background: 'white',
         borderRadius: 14,
@@ -39,49 +43,68 @@ function WardCard({ top, area }: { top: number; area: AreaInfo }) {
         border: '1px solid rgba(0,0,0,0.06)',
         overflow: 'hidden',
         fontFamily: 'Inter, sans-serif',
+        maxHeight: 'calc(100vh - 200px)',
+        display: 'flex',
+        flexDirection: 'column',
       }}
     >
-      {/* Header strip */}
+      {/* ── Header strip ── */}
       <div style={{
-        background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+        background: isConstituency
+          ? 'linear-gradient(135deg, #2e1065 0%, #4c1d95 100%)'
+          : 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
         padding: '10px 14px 9px',
+        flexShrink: 0,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <span style={{
-            fontSize: 10, fontWeight: 800, color: '#ef4444',
+            fontSize: 10, fontWeight: 800,
+            color: isConstituency ? '#c4b5fd' : '#ef4444',
             letterSpacing: '0.1em', textTransform: 'uppercase',
-          }}>BMC Ward {area.ward}</span>
+          }}>
+            {isConstituency ? `AC ${area.ac_no ?? ''}` : `BMC Ward ${area.ward}`}
+          </span>
           <span style={{
-            fontSize: 10, fontWeight: 600,
-            color: '#64748b',
-            letterSpacing: '0.04em',
+            fontSize: 10, fontWeight: 600, color: '#64748b', letterSpacing: '0.04em',
           }}>{area.zone}</span>
         </div>
         <div style={{
           fontSize: 14, fontWeight: 800, color: 'white',
           letterSpacing: '-0.02em', marginTop: 3, lineHeight: 1.2,
         }}>{area.name}</div>
-        <div style={{
-          fontSize: 10, color: '#94a3b8', marginTop: 2,
-          fontWeight: 500, lineHeight: 1.4,
-        }}>{area.direction} Mumbai</div>
+        {!isConstituency && (
+          <div style={{
+            fontSize: 10, color: '#94a3b8', marginTop: 2,
+            fontWeight: 500, lineHeight: 1.4,
+          }}>{area.direction} Mumbai</div>
+        )}
+        {isConstituency && area.pc_name && (
+          <div style={{
+            fontSize: 10, color: '#c4b5fd', marginTop: 2,
+            fontWeight: 500, lineHeight: 1.4,
+          }}>Part of {area.pc_name} PC</div>
+        )}
       </div>
 
-      {/* Neighbourhoods */}
-      <div style={{ padding: '8px 14px', borderBottom: '1px solid #f1f5f9' }}>
-        <div style={{
-          fontSize: 9, fontWeight: 700, color: '#94a3b8',
-          textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 3,
-        }}>Covers</div>
-        <div style={{ fontSize: 11, color: '#475569', lineHeight: 1.5, fontWeight: 500 }}>
-          {area.neighbourhoods}
+      {/* ── Neighbourhoods ── */}
+      {!isConstituency && (
+        <div style={{ padding: '8px 14px', borderBottom: '1px solid #f1f5f9', flexShrink: 0 }}>
+          <div style={{
+            fontSize: 9, fontWeight: 700, color: '#94a3b8',
+            textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 3,
+          }}>Covers</div>
+          <div style={{ fontSize: 11, color: '#475569', lineHeight: 1.5, fontWeight: 500 }}>
+            {area.neighbourhoods}
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Stats row */}
+      {/* ── Stats row ── */}
       <div style={{
-        padding: '10px 14px 12px',
+        padding: '10px 14px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        borderBottom: prabhags.length > 0 ? '1px solid #f1f5f9' : 'none',
+        flexShrink: 0,
       }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <span style={{
@@ -100,6 +123,87 @@ function WardCard({ top, area }: { top: number; area: AreaInfo }) {
           border: `1px solid ${ic}30`,
         }}>{intensity}</span>
       </div>
+
+      {/* ── Nagar Sevak / Prabhag list ── */}
+      {prabhags.length > 0 && (
+        <div style={{ overflowY: 'auto', flexGrow: 1 }}>
+          <div style={{
+            padding: '7px 14px 4px',
+            fontSize: 9, fontWeight: 800, color: '#94a3b8',
+            textTransform: 'uppercase', letterSpacing: '0.1em',
+            position: 'sticky', top: 0, background: 'white',
+            borderBottom: '1px solid #f8fafc',
+          }}>
+            Nagar Sevaks · {prabhags.length} Prabhags
+          </div>
+
+          {prabhags.map((p) => {
+            const ps = getPartyStyle(p.party);
+            return (
+              <div
+                key={p.ward_no}
+                style={{
+                  padding: '7px 14px',
+                  borderBottom: '1px solid #f8fafc',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                }}
+              >
+                {/* Ward number badge */}
+                <div style={{
+                  minWidth: 28, height: 28,
+                  borderRadius: '50%',
+                  background: '#7f1d1d',
+                  color: 'white',
+                  fontSize: 10,
+                  fontWeight: 800,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                  letterSpacing: '-0.02em',
+                }}>
+                  {p.ward_no}
+                </div>
+
+                {/* Corporator info */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{
+                    fontSize: 11, fontWeight: 700, color: '#1e293b',
+                    whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                    lineHeight: 1.2,
+                  }}>
+                    {p.corporator}
+                  </div>
+                  <div style={{
+                    fontSize: 10, color: '#64748b', marginTop: 1,
+                    whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                  }}>
+                    {p.name}
+                  </div>
+                </div>
+
+                {/* Party badge */}
+                <span style={{
+                  fontSize: 9,
+                  fontWeight: 800,
+                  color: ps.text,
+                  background: ps.bg,
+                  border: `1px solid ${ps.border}`,
+                  borderRadius: 4,
+                  padding: '2px 5px',
+                  flexShrink: 0,
+                  letterSpacing: '0.03em',
+                  whiteSpace: 'nowrap',
+                }}>
+                  {p.party}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </motion.div>
   );
 }
@@ -133,7 +237,7 @@ export default function StatsCard({ totalReports, activeReports, navbarHeight, h
           top: navbarHeight + 16,
           left: 16,
           zIndex: 900,
-          width: 224,
+          width: 248,
           background: 'white',
           borderRadius: 14,
           padding: '13px 18px',
@@ -168,10 +272,10 @@ export default function StatsCard({ totalReports, activeReports, navbarHeight, h
         </div>
       </motion.div>
 
-      {/* Ward card — independently fixed below stats */}
+      {/* Ward hover card */}
       <AnimatePresence>
         {hoveredArea && wardTop > 0 && (
-          <WardCard key={hoveredArea.ward} top={wardTop} area={hoveredArea} />
+          <WardCard key={hoveredArea.ward + hoveredArea.name} top={wardTop} area={hoveredArea} />
         )}
       </AnimatePresence>
     </>
