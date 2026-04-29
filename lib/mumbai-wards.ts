@@ -1,170 +1,280 @@
-// Mumbai BMC Electoral Wards (Prabhags) — 227 wards across 24 admin zones
-// Data: BMC 2017/2022 ward list · corporators as of last known election cycle
-// Format: ward_no → { name, corporator, party, admin_ward }
+// Mumbai BMC Electoral Wards (Prabhags) — 227 wards
+// Corporator data: corporators-3.json (2024/2026 cycle)
+// MLA data: mumbai_suburban_mlas_2026.json (2026 cycle)
 // admin_ward keys match BMC_WARD_INFO in Map.tsx
 
 export type PrabhagInfo = {
   ward_no: number;
-  name: string;
-  corporator: string;
+  candidate: string; // corporator / nagar sevak name
   party: string;
   admin_ward: string;
 };
 
+export type MlaInfo = {
+  constituency: string;
+  mla_name: string;
+  party: string;
+};
+
+// ── 2026 MLA Data ─────────────────────────────────────────────────────────────
+export const MUMBAI_SUBURBAN_MLAS: MlaInfo[] = [
+  { constituency: '152-Borivali',             mla_name: 'Sanjay Upadhay',               party: 'BJP' },
+  { constituency: '153-Dahisar',              mla_name: 'Chaudhary Manisha Ashok',       party: 'BJP' },
+  { constituency: '154-Magathane',            mla_name: 'Prakash Rajaram Surve',         party: 'Shiv Sena' },
+  { constituency: '155-Mulund',               mla_name: 'Kotecha Mihir Chadrakant',      party: 'BJP' },
+  { constituency: '156-Vikhroli',             mla_name: 'Raut Sunil Rajaram',            party: 'Shiv Sena UBT' },
+  { constituency: '157-Bhandup West',         mla_name: 'Ashok Patil',                   party: 'Shiv Sena' },
+  { constituency: '158-Jogeshwari East',      mla_name: 'Anant Nar',                     party: 'Shiv Sena UBT' },
+  { constituency: '159-Dindoshi',             mla_name: 'Sunil Prabhu',                  party: 'Shiv Sena UBT' },
+  { constituency: '160-Kandivali East',       mla_name: 'Atul Bhatkhalkar',              party: 'BJP' },
+  { constituency: '161-Charkop',              mla_name: 'Yogesh Sagar',                  party: 'BJP' },
+  { constituency: '162-Malad West',           mla_name: 'Aslam Ramzanali Shaikh',        party: 'Congress' },
+  { constituency: '163-Goregaon',             mla_name: 'Vidya Jaiprakash Thakur',       party: 'BJP' },
+  { constituency: '164-Varsova',              mla_name: 'Harun Khan',                    party: 'Shiv Sena UBT' },
+  { constituency: '165-Andheri West',         mla_name: 'Ameet Bhaskar Satam',           party: 'BJP' },
+  { constituency: '166-Andheri East',         mla_name: 'Muraji Patel',                  party: 'Shiv Sena' },
+  { constituency: '167-Vile Parle',           mla_name: 'Alavani Parag',                 party: 'BJP' },
+  { constituency: '168-Chandivali',           mla_name: 'Dilip Bhausaheb Lande',         party: 'Shiv Sena' },
+  { constituency: '169-Ghatkopar West',       mla_name: 'Ram Kadam',                     party: 'BJP' },
+  { constituency: '170-Ghatkopar East',       mla_name: 'Parag Shah',                    party: 'BJP' },
+  { constituency: '171-Mankhurd Shivaji Nagar', mla_name: 'Abu Asim Azmi',              party: 'Samajwadi Party' },
+  { constituency: '172-Anushakti Nagar',      mla_name: 'Sana Malik',                    party: 'NCP (Ajit)' },
+  { constituency: '173-Chembur',              mla_name: 'Tukaram Kate',                  party: 'Shiv Sena' },
+  { constituency: '174-Kurla (SC)',           mla_name: 'Mangesh Kudalkar',              party: 'Shiv Sena' },
+  { constituency: '175-Kalina',               mla_name: 'Sanjay Govind Potnis',          party: 'Shiv Sena UBT' },
+  { constituency: '176-Vandre East',          mla_name: 'Varun Sardesai',                party: 'Shiv Sena UBT' },
+  { constituency: '177-Vandre West',          mla_name: 'Adv. Ashish Babaji Shelar',     party: 'BJP' },
+];
+
+// ── 2024/2026 Corporator / Nagar Sevak Data ───────────────────────────────────
+// admin_ward mapping is based on BMC ward number ranges from official BMC records
 export const MUMBAI_PRABHAGS: PrabhagInfo[] = [
-  // ── A Ward (Colaba / Churchgate) ──────────────────────────────────────
-  { ward_no: 1,  name: 'Colaba',          corporator: 'Makarand Narwekar',   party: 'BJP',      admin_ward: 'A'   },
-  { ward_no: 2,  name: 'Churchgate',      corporator: 'Makrand Narwekar',    party: 'BJP',      admin_ward: 'A'   },
-  { ward_no: 3,  name: 'Navy Nagar',      corporator: 'Hema Moreshwar',      party: 'BJP',      admin_ward: 'A'   },
-
-  // ── B Ward (Dongri / Mazagaon) ────────────────────────────────────────
-  { ward_no: 4,  name: 'Dongri',          corporator: 'Mateen Mulla',        party: 'NCP',      admin_ward: 'B'   },
-  { ward_no: 5,  name: 'Nagpada',         corporator: 'Amin Patel',          party: 'NCP',      admin_ward: 'B'   },
-  { ward_no: 6,  name: 'Mazagaon',        corporator: 'Manoj Palav',         party: 'Shiv Sena',admin_ward: 'B'   },
-  { ward_no: 7,  name: 'Byculla (N)',     corporator: 'Yamini Jadhav',       party: 'Shiv Sena',admin_ward: 'B'   },
-
-  // ── C Ward (Pydhonie / Bhuleshwar) ───────────────────────────────────
-  { ward_no: 8,  name: 'Pydhonie',        corporator: 'Rais Shaikh',         party: 'Samajwadi',admin_ward: 'C'   },
-  { ward_no: 9,  name: 'Bhuleshwar',      corporator: 'Prabhakar Shinde',    party: 'BJP',      admin_ward: 'C'   },
-  { ward_no: 10, name: 'Kalbadevi',       corporator: 'Viral Thakkar',       party: 'BJP',      admin_ward: 'C'   },
-  { ward_no: 11, name: 'Crawford Market', corporator: 'Mohd. Arif',          party: 'NCP',      admin_ward: 'C'   },
-
-  // ── D Ward (Girgaon / Malabar Hill) ──────────────────────────────────
-  { ward_no: 12, name: 'Girgaon',         corporator: 'Atul Shah',           party: 'BJP',      admin_ward: 'D'   },
-  { ward_no: 13, name: 'Malabar Hill',    corporator: 'Mangal Prabhat Lodha',party: 'BJP',      admin_ward: 'D'   },
-  { ward_no: 14, name: 'Chowpatty',       corporator: 'Harshita Narwekar',   party: 'BJP',      admin_ward: 'D'   },
-  { ward_no: 15, name: 'Grant Road',      corporator: 'Samir Desai',         party: 'BJP',      admin_ward: 'D'   },
-
-  // ── E Ward (Byculla / Sewri) ──────────────────────────────────────────
-  { ward_no: 16, name: 'Byculla',         corporator: 'Waris Pathan',        party: 'AIMIM',    admin_ward: 'E'   },
-  { ward_no: 17, name: 'Sewri',           corporator: 'Pratibha Patil',      party: 'Congress', admin_ward: 'E'   },
-  { ward_no: 18, name: 'NM Joshi Marg',   corporator: 'Ravindra Waikar',     party: 'Shiv Sena',admin_ward: 'E'   },
-  { ward_no: 19, name: 'Reay Road',       corporator: 'Suresh Shett',        party: 'BJP',      admin_ward: 'E'   },
-
-  // ── F/N Ward (Matunga / Sion) ─────────────────────────────────────────
-  { ward_no: 20, name: 'Matunga East',    corporator: 'Bapu Koli',           party: 'BJP',      admin_ward: 'F/N' },
-  { ward_no: 21, name: 'Sion',            corporator: 'Kishore Patkar',      party: 'Shiv Sena',admin_ward: 'F/N' },
-  { ward_no: 22, name: 'Antop Hill',      corporator: 'Dilip Shinde',        party: 'Congress', admin_ward: 'F/N' },
-  { ward_no: 23, name: 'Wadala',          corporator: 'Anil Kokil',          party: 'BJP',      admin_ward: 'F/N' },
-  { ward_no: 24, name: 'Dharavi N',       corporator: 'Rajshree Patkar',     party: 'Shiv Sena',admin_ward: 'F/N' },
-
-  // ── F/S Ward (Parel / Lower Parel) ───────────────────────────────────
-  { ward_no: 25, name: 'Parel',           corporator: 'Anjali Naik',         party: 'NCP',      admin_ward: 'F/S' },
-  { ward_no: 26, name: 'Curry Road',      corporator: 'Raju Pednekar',       party: 'BJP',      admin_ward: 'F/S' },
-  { ward_no: 27, name: 'Lower Parel',     corporator: 'Sunita Yadav',        party: 'Congress', admin_ward: 'F/S' },
-  { ward_no: 28, name: 'Lalbaug',         corporator: 'Ajay Chaudhari',      party: 'Shiv Sena',admin_ward: 'F/S' },
-
-  // ── G/N Ward (Dadar / Shivaji Park) ──────────────────────────────────
-  { ward_no: 29, name: 'Dadar TT',        corporator: 'Santosh Dhotre',      party: 'Shiv Sena',admin_ward: 'G/N' },
-  { ward_no: 30, name: 'Shivaji Park',    corporator: 'Rohini Salunkhe',     party: 'Shiv Sena',admin_ward: 'G/N' },
-  { ward_no: 31, name: 'Mahim',           corporator: 'Sada Sarvankar',      party: 'Shiv Sena',admin_ward: 'G/N' },
-  { ward_no: 32, name: 'Hindu Colony',    corporator: 'Prasad Patkar',       party: 'BJP',      admin_ward: 'G/N' },
-
-  // ── G/S Ward (Worli / Prabhadevi) ────────────────────────────────────
-  { ward_no: 33, name: 'Worli',           corporator: 'Sunil Shinde',        party: 'Shiv Sena',admin_ward: 'G/S' },
-  { ward_no: 34, name: 'Prabhadevi',      corporator: 'Aaditya Thackeray',   party: 'Shiv Sena',admin_ward: 'G/S' },
-  { ward_no: 35, name: 'Elphinstone Rd',  corporator: 'Rajul Patel',         party: 'BJP',      admin_ward: 'G/S' },
-
-  // ── H/E Ward (Bandra East / Dharavi) ─────────────────────────────────
-  { ward_no: 36, name: 'Bandra East',     corporator: 'Asif Zakaria',        party: 'Congress', admin_ward: 'H/E' },
-  { ward_no: 37, name: 'Khar East',       corporator: 'Anand Patil',         party: 'BJP',      admin_ward: 'H/E' },
-  { ward_no: 38, name: 'Santacruz East',  corporator: 'Ramesh Korgaonkar',   party: 'Shiv Sena',admin_ward: 'H/E' },
-  { ward_no: 39, name: 'Kurla West',      corporator: 'Mohd. Arif Naseem',   party: 'Congress', admin_ward: 'H/E' },
-  { ward_no: 40, name: 'Dharavi S',       corporator: 'Kajal Yadav',         party: 'BJP',      admin_ward: 'H/E' },
-
-  // ── H/W Ward (Bandra West) ────────────────────────────────────────────
-  { ward_no: 41, name: 'Bandra West',     corporator: 'Shyam Maniyar',       party: 'BJP',      admin_ward: 'H/W' },
-  { ward_no: 42, name: 'Khar West',       corporator: 'Ramesh Singal',       party: 'BJP',      admin_ward: 'H/W' },
-  { ward_no: 43, name: 'Santacruz West',  corporator: 'Sheetal Mhatre',      party: 'Shiv Sena',admin_ward: 'H/W' },
-  { ward_no: 44, name: 'Carter Road',     corporator: 'Jyoti Gaikwad',       party: 'Congress', admin_ward: 'H/W' },
-
-  // ── K/E Ward (Andheri East / Sakinaka) ───────────────────────────────
-  { ward_no: 45, name: 'Andheri East',    corporator: 'Murji Patel',         party: 'BJP',      admin_ward: 'K/E' },
-  { ward_no: 46, name: 'Sakinaka',        corporator: 'Sunil Ganatra',       party: 'BJP',      admin_ward: 'K/E' },
-  { ward_no: 47, name: 'Marol',           corporator: 'Ravindra Waikar Jr',  party: 'Shiv Sena',admin_ward: 'K/E' },
-  { ward_no: 48, name: 'JB Nagar',        corporator: 'Rajesh Sutar',        party: 'BJP',      admin_ward: 'K/E' },
-  { ward_no: 49, name: 'Chakala',         corporator: 'Bharati Lad',         party: 'BJP',      admin_ward: 'K/E' },
-  { ward_no: 50, name: 'MIDC Andheri',    corporator: 'Sanjay Patil',        party: 'Shiv Sena',admin_ward: 'K/E' },
-
-  // ── K/W Ward (Andheri West / Versova) ────────────────────────────────
-  { ward_no: 51, name: 'Andheri West',    corporator: 'Harish Patil',        party: 'BJP',      admin_ward: 'K/W' },
-  { ward_no: 52, name: 'Versova',         corporator: 'Bharti Lavekar',      party: 'Congress', admin_ward: 'K/W' },
-  { ward_no: 53, name: 'Oshiwara',        corporator: 'Sunita Yadav',        party: 'BJP',      admin_ward: 'K/W' },
-  { ward_no: 54, name: 'Juhu',            corporator: 'Urmila Matondkar',    party: 'Congress', admin_ward: 'K/W' },
-  { ward_no: 55, name: 'DN Nagar',        corporator: 'Preeti Subhash',      party: 'BJP',      admin_ward: 'K/W' },
-  { ward_no: 56, name: 'Four Bungalows',  corporator: 'Dilip Patel',         party: 'Shiv Sena',admin_ward: 'K/W' },
-
-  // ── L Ward (Kurla / Saki Naka) ───────────────────────────────────────
-  { ward_no: 57, name: 'Kurla East',      corporator: 'Mohd. Atiq',          party: 'Congress', admin_ward: 'L'   },
-  { ward_no: 58, name: 'Kurla West',      corporator: 'Vijay Gharat',        party: 'Shiv Sena',admin_ward: 'L'   },
-  { ward_no: 59, name: 'Chandivali',      corporator: 'Raju Korde',          party: 'BJP',      admin_ward: 'L'   },
-  { ward_no: 60, name: 'Saki Naka',       corporator: 'Sanjay Mhatre',       party: 'Shiv Sena',admin_ward: 'L'   },
-  { ward_no: 61, name: 'Powai (part)',    corporator: 'Harshit Patel',       party: 'BJP',      admin_ward: 'L'   },
-
-  // ── M/E Ward (Govandi / Mankhurd) ────────────────────────────────────
-  { ward_no: 62, name: 'Govandi',         corporator: 'Abu Asim Azmi',       party: 'Samajwadi',admin_ward: 'M/E' },
-  { ward_no: 63, name: 'Mankhurd',        corporator: 'Suresh Patkar',       party: 'Shiv Sena',admin_ward: 'M/E' },
-  { ward_no: 64, name: 'Deonar',          corporator: 'Preeti Dubey',        party: 'BJP',      admin_ward: 'M/E' },
-  { ward_no: 65, name: 'Trombay',         corporator: 'Rakhi Jadhav',        party: 'BJP',      admin_ward: 'M/E' },
-  { ward_no: 66, name: 'Anushakti Nagar', corporator: 'Anjali Borkar',       party: 'BJP',      admin_ward: 'M/E' },
-
-  // ── M/W Ward (Chembur West) ───────────────────────────────────────────
-  { ward_no: 67, name: 'Chembur',         corporator: 'Pradip Sharma',       party: 'BJP',      admin_ward: 'M/W' },
-  { ward_no: 68, name: 'Mahul',           corporator: 'Sneha More',          party: 'Shiv Sena',admin_ward: 'M/W' },
-  { ward_no: 69, name: 'Tilak Nagar',     corporator: 'Nitin Nangare',       party: 'BJP',      admin_ward: 'M/W' },
-  { ward_no: 70, name: 'Chunabhatti',     corporator: 'Ramdas Shinde',       party: 'Shiv Sena',admin_ward: 'M/W' },
-
-  // ── N Ward (Ghatkopar) ────────────────────────────────────────────────
-  { ward_no: 71, name: 'Ghatkopar East',  corporator: 'Kesarben Murji Patel',party: 'BJP',      admin_ward: 'N'   },
-  { ward_no: 72, name: 'Ghatkopar West',  corporator: 'Prakash Surve',       party: 'BJP',      admin_ward: 'N'   },
-  { ward_no: 73, name: 'Vikhroli West',   corporator: 'Yogesh Palande',      party: 'Shiv Sena',admin_ward: 'N'   },
-  { ward_no: 74, name: 'Rajawadi',        corporator: 'Mangesh Satamkar',    party: 'Shiv Sena',admin_ward: 'N'   },
-  { ward_no: 75, name: 'Ramabai Nagar',   corporator: 'Prabhavati Kadam',    party: 'BJP',      admin_ward: 'N'   },
-
-  // ── P/N Ward (Malad / Kandivali East) ────────────────────────────────
-  { ward_no: 76, name: 'Malad East',      corporator: 'Anil Kokil',          party: 'BJP',      admin_ward: 'P/N' },
-  { ward_no: 77, name: 'Kandivali East',  corporator: 'Vinod Shelar',        party: 'BJP',      admin_ward: 'P/N' },
-  { ward_no: 78, name: 'Poisar',          corporator: 'Suhas Dhuri',         party: 'BJP',      admin_ward: 'P/N' },
-  { ward_no: 79, name: 'Charkop',         corporator: 'Shubha Raul',         party: 'BJP',      admin_ward: 'P/N' },
-  { ward_no: 80, name: 'Eksar',           corporator: 'Meena Prabhu',        party: 'BJP',      admin_ward: 'P/N' },
-  { ward_no: 81, name: 'Kandivali NE',    corporator: 'Chandrakant Sapkal',  party: 'BJP',      admin_ward: 'P/N' },
-
-  // ── P/S Ward (Goregaon / Malad West) ─────────────────────────────────
-  { ward_no: 82, name: 'Goregaon East',   corporator: 'Vidya Thakur',        party: 'BJP',      admin_ward: 'P/S' },
-  { ward_no: 83, name: 'Goregaon West',   corporator: 'Sanjay Nirupam',      party: 'Congress', admin_ward: 'P/S' },
-  { ward_no: 84, name: 'Malad West',      corporator: 'Amin Patel',          party: 'NCP',      admin_ward: 'P/S' },
-  { ward_no: 85, name: 'Aarey Colony',    corporator: 'Priya Sawant',        party: 'Shiv Sena',admin_ward: 'P/S' },
-  { ward_no: 86, name: 'Film City',       corporator: 'Nilesh Sambhus',      party: 'BJP',      admin_ward: 'P/S' },
-
-  // ── R/C Ward (Kandivali West) ─────────────────────────────────────────
-  { ward_no: 87, name: 'Kandivali West',  corporator: 'Bharti Lad',          party: 'BJP',      admin_ward: 'R/C' },
-  { ward_no: 88, name: 'Dahisar (part)',  corporator: 'Chetan Sadaphule',    party: 'BJP',      admin_ward: 'R/C' },
-  { ward_no: 89, name: 'Borivali W (pt)', corporator: 'Sunil Prabhu',        party: 'Shiv Sena',admin_ward: 'R/C' },
-
-  // ── R/N Ward (Borivali North / Dahisar) ──────────────────────────────
-  { ward_no: 90, name: 'Borivali',        corporator: 'Sunil Rane',          party: 'Shiv Sena',admin_ward: 'R/N' },
-  { ward_no: 91, name: 'Dahisar East',    corporator: 'Vinod Ghosalkar',     party: 'Shiv Sena',admin_ward: 'R/N' },
-  { ward_no: 92, name: 'Dahisar West',    corporator: 'Mangal Koli',         party: 'BJP',      admin_ward: 'R/N' },
-  { ward_no: 93, name: 'Poisar Gymkhana', corporator: 'Ashish Shelar',       party: 'BJP',      admin_ward: 'R/N' },
-
-  // ── R/S Ward (Borivali South) ─────────────────────────────────────────
-  { ward_no: 94, name: 'Borivali South',  corporator: 'Praveen Ghag',        party: 'BJP',      admin_ward: 'R/S' },
-  { ward_no: 95, name: 'Samata Nagar',    corporator: 'Surekha Shetty',      party: 'BJP',      admin_ward: 'R/S' },
-  { ward_no: 96, name: 'IC Colony',       corporator: 'Gopal Shetty',        party: 'BJP',      admin_ward: 'R/S' },
-  { ward_no: 97, name: 'Shimpoli',        corporator: 'Rajan Vichare',       party: 'Shiv Sena',admin_ward: 'R/S' },
-
-  // ── S Ward (Vikhroli / Bhandup) ───────────────────────────────────────
-  { ward_no: 98, name: 'Vikhroli East',   corporator: 'Sunil Parab',         party: 'Shiv Sena',admin_ward: 'S'   },
-  { ward_no: 99, name: 'Bhandup East',    corporator: 'Mangesh Kudalkar',    party: 'BJP',      admin_ward: 'S'   },
-  { ward_no: 100, name: 'Bhandup West',   corporator: 'Pravin Chheda',       party: 'BJP',      admin_ward: 'S'   },
-  { ward_no: 101, name: 'Kanjurmarg',     corporator: 'Shubha Raul',         party: 'BJP',      admin_ward: 'S'   },
-  { ward_no: 102, name: 'Powai',          corporator: 'Harshit Patel',       party: 'BJP',      admin_ward: 'S'   },
-
-  // ── T Ward (Mulund) ───────────────────────────────────────────────────
-  { ward_no: 103, name: 'Mulund East',    corporator: 'Mihir Kotecha',       party: 'BJP',      admin_ward: 'T'   },
-  { ward_no: 104, name: 'Mulund West',    corporator: 'Satyajit Tambe',      party: 'NCP',      admin_ward: 'T'   },
-  { ward_no: 105, name: 'Nahur',          corporator: 'Sangita Hanamghar',   party: 'BJP',      admin_ward: 'T'   },
-  { ward_no: 106, name: 'Bhandup North',  corporator: 'Ravindra Waikar',     party: 'Shiv Sena',admin_ward: 'T'   },
+  { ward_no: 1,   candidate: 'Rekha Yadav',                          party: 'Shiv Sena',      admin_ward: 'A'   },
+  { ward_no: 2,   candidate: 'Tejashwi Ghosalkar',                   party: 'Shiv Sena',      admin_ward: 'A'   },
+  { ward_no: 3,   candidate: 'Prakash Darekar',                       party: 'BJP',            admin_ward: 'A'   },
+  { ward_no: 4,   candidate: 'Mangesh Pangare',                       party: 'Shiv Sena',      admin_ward: 'B'   },
+  { ward_no: 5,   candidate: 'Sanjay Ghadi',                          party: 'Shiv Sena',      admin_ward: 'B'   },
+  { ward_no: 6,   candidate: 'Diksha Harshad Karkar',                 party: 'Shiv Sena',      admin_ward: 'B'   },
+  { ward_no: 7,   candidate: 'Ganesh Khankar',                        party: 'BJP',            admin_ward: 'B'   },
+  { ward_no: 8,   candidate: 'Yogita Patil',                          party: 'BJP',            admin_ward: 'C'   },
+  { ward_no: 9,   candidate: 'Shivanand Shetty',                      party: 'BJP',            admin_ward: 'C'   },
+  { ward_no: 10,  candidate: 'Jitendra Patel',                        party: 'BJP',            admin_ward: 'C'   },
+  { ward_no: 11,  candidate: 'Aditi Khursange',                       party: 'Shiv Sena',      admin_ward: 'C'   },
+  { ward_no: 12,  candidate: 'Sarika Jhore',                          party: 'Shiv Sena UBT',  admin_ward: 'D'   },
+  { ward_no: 13,  candidate: 'Rani Dwivedi',                          party: 'BJP',            admin_ward: 'D'   },
+  { ward_no: 14,  candidate: 'Seema Kiran Shinde',                    party: 'BJP',            admin_ward: 'D'   },
+  { ward_no: 15,  candidate: 'Jignasa Shaha',                         party: 'BJP',            admin_ward: 'D'   },
+  { ward_no: 16,  candidate: 'Shweta Korgawkar',                      party: 'BJP',            admin_ward: 'E'   },
+  { ward_no: 17,  candidate: 'Shilpa Saurabh Sangore',                party: 'BJP',            admin_ward: 'E'   },
+  { ward_no: 18,  candidate: 'Sandhya Vipul Doshi',                   party: 'Shiv Sena',      admin_ward: 'E'   },
+  { ward_no: 19,  candidate: 'Shrikant Kavathankar',                  party: 'BJP',            admin_ward: 'E'   },
+  { ward_no: 20,  candidate: 'Deepak Tawde',                          party: 'BJP',            admin_ward: 'F/N' },
+  { ward_no: 21,  candidate: 'Lina Patel Deherkar',                   party: 'BJP',            admin_ward: 'F/N' },
+  { ward_no: 22,  candidate: 'Himanshu Parekh',                       party: 'BJP',            admin_ward: 'F/N' },
+  { ward_no: 23,  candidate: 'Shivakumar Jha',                        party: 'BJP',            admin_ward: 'F/N' },
+  { ward_no: 24,  candidate: 'Swati Jaiswal',                         party: 'BJP',            admin_ward: 'F/N' },
+  { ward_no: 25,  candidate: 'Nisha Parulekar',                       party: 'BJP',            admin_ward: 'F/S' },
+  { ward_no: 26,  candidate: 'Dharmendra Kale',                       party: 'Shiv Sena UBT',  admin_ward: 'F/S' },
+  { ward_no: 27,  candidate: 'Neelam Sunil Gurav',                    party: 'BJP',            admin_ward: 'F/S' },
+  { ward_no: 28,  candidate: 'Ajanta Yadav',                          party: 'Congress',       admin_ward: 'F/S' },
+  { ward_no: 29,  candidate: 'Sachin Patil',                          party: 'Shiv Sena UBT',  admin_ward: 'G/N' },
+  { ward_no: 30,  candidate: 'Dhaval Vora',                           party: 'BJP',            admin_ward: 'G/N' },
+  { ward_no: 31,  candidate: 'Manisha Kamlesh Yadav',                 party: 'BJP',            admin_ward: 'G/N' },
+  { ward_no: 32,  candidate: 'Geeta Bhandari',                        party: 'Shiv Sena UBT',  admin_ward: 'G/N' },
+  { ward_no: 33,  candidate: 'Qamar Jahan Moeen Siddiqui',            party: 'Congress',       admin_ward: 'G/S' },
+  { ward_no: 34,  candidate: 'Haiderali Aslam Sheikh',                party: 'Congress',       admin_ward: 'G/S' },
+  { ward_no: 35,  candidate: 'Yogesh Rajbadur Verma',                 party: 'BJP',            admin_ward: 'G/S' },
+  { ward_no: 36,  candidate: 'Siddharth Sharma',                      party: 'BJP',            admin_ward: 'H/E' },
+  { ward_no: 37,  candidate: 'Yogita Kadam',                          party: 'Shiv Sena UBT',  admin_ward: 'H/E' },
+  { ward_no: 38,  candidate: 'Surekha Parab',                         party: 'MNS',            admin_ward: 'H/E' },
+  { ward_no: 39,  candidate: 'Pushpa Kalmbe',                         party: 'Shiv Sena UBT',  admin_ward: 'H/E' },
+  { ward_no: 40,  candidate: 'Tulashiram Shinde',                     party: 'Shiv Sena UBT',  admin_ward: 'H/E' },
+  { ward_no: 41,  candidate: 'Suhas Wadkar',                          party: 'Shiv Sena UBT',  admin_ward: 'H/W' },
+  { ward_no: 42,  candidate: 'Dhanashree Vaibhav Bharadkar',          party: 'Shiv Sena',      admin_ward: 'H/W' },
+  { ward_no: 43,  candidate: 'Ajit Balkrishna Ravarane',              party: 'NCP (SP)',       admin_ward: 'H/W' },
+  { ward_no: 44,  candidate: 'Sangeeta Sharma',                       party: 'BJP',            admin_ward: 'H/W' },
+  { ward_no: 45,  candidate: 'Sanjay Namdev Kamble',                  party: 'BJP',            admin_ward: 'K/E' },
+  { ward_no: 46,  candidate: 'Yogita Koli',                           party: 'BJP',            admin_ward: 'K/E' },
+  { ward_no: 47,  candidate: 'Tejindersing Tiwana',                   party: 'BJP',            admin_ward: 'K/E' },
+  { ward_no: 48,  candidate: 'Rafiq Ilyas Sheikh',                    party: 'Congress',       admin_ward: 'K/E' },
+  { ward_no: 49,  candidate: 'Sangita Koli',                          party: 'Congress',       admin_ward: 'K/E' },
+  { ward_no: 50,  candidate: 'Vikram Rajput',                         party: 'BJP',            admin_ward: 'K/E' },
+  { ward_no: 51,  candidate: 'Varsha Swapnil Tembalkar',              party: 'Shiv Sena',      admin_ward: 'K/W' },
+  { ward_no: 52,  candidate: 'Preeti Satam',                          party: 'BJP',            admin_ward: 'K/W' },
+  { ward_no: 53,  candidate: 'Jitendra Valvi',                        party: 'Shiv Sena UBT',  admin_ward: 'K/W' },
+  { ward_no: 54,  candidate: 'Ankit Sunil Prabhu',                    party: 'Shiv Sena UBT',  admin_ward: 'K/W' },
+  { ward_no: 55,  candidate: 'Harsh Patel',                           party: 'BJP',            admin_ward: 'K/W' },
+  { ward_no: 56,  candidate: 'Laxmi Bhatia',                          party: 'Shiv Sena UBT',  admin_ward: 'K/W' },
+  { ward_no: 57,  candidate: 'Pillay Srikala Ramachandran',           party: 'BJP',            admin_ward: 'L'   },
+  { ward_no: 58,  candidate: 'Sandeep Patel',                         party: 'BJP',            admin_ward: 'L'   },
+  { ward_no: 59,  candidate: 'Yashodhar Fanse',                       party: 'Shiv Sena UBT',  admin_ward: 'L'   },
+  { ward_no: 60,  candidate: 'Sayley Kulkarni',                       party: 'BJP',            admin_ward: 'L'   },
+  { ward_no: 61,  candidate: 'Divya Avnish Singh',                    party: 'Congress',       admin_ward: 'L'   },
+  { ward_no: 62,  candidate: 'Jhishan Genghis Multani',               party: 'Shiv Sena UBT',  admin_ward: 'M/E' },
+  { ward_no: 63,  candidate: 'Rupesh Savarkar',                       party: 'BJP',            admin_ward: 'M/E' },
+  { ward_no: 64,  candidate: 'Saba Harun Khan',                       party: 'Shiv Sena UBT',  admin_ward: 'M/E' },
+  { ward_no: 65,  candidate: 'Vitthal Banderi',                       party: 'BJP',            admin_ward: 'M/E' },
+  { ward_no: 66,  candidate: 'Haider Mehr Mohsin',                    party: 'Congress',       admin_ward: 'M/E' },
+  { ward_no: 67,  candidate: 'Deepak Kotekar',                        party: 'BJP',            admin_ward: 'M/W' },
+  { ward_no: 68,  candidate: 'Rohan Rathore',                         party: 'BJP',            admin_ward: 'M/W' },
+  { ward_no: 69,  candidate: 'Sudha Shambhunath Singh',               party: 'BJP',            admin_ward: 'M/W' },
+  { ward_no: 70,  candidate: 'Anish Makwani',                         party: 'BJP',            admin_ward: 'M/W' },
+  { ward_no: 71,  candidate: 'Sunita Rajesh Mehta',                   party: 'BJP',            admin_ward: 'N'   },
+  { ward_no: 72,  candidate: 'Mamata Yadav',                          party: 'BJP',            admin_ward: 'N'   },
+  { ward_no: 73,  candidate: 'Lona Rawat',                            party: 'Shiv Sena UBT',  admin_ward: 'N'   },
+  { ward_no: 74,  candidate: 'Vidya Arya',                            party: 'MNS',            admin_ward: 'N'   },
+  { ward_no: 75,  candidate: 'Pramod Pandurang Sawant',               party: 'Shiv Sena UBT',  admin_ward: 'N'   },
+  { ward_no: 76,  candidate: 'Prakash Daulat Musale',                 party: 'BJP',            admin_ward: 'P/N' },
+  { ward_no: 77,  candidate: 'Shivani Shailesh Parab',                party: 'Shiv Sena UBT',  admin_ward: 'P/N' },
+  { ward_no: 78,  candidate: 'Sophie Nazia Abdul Jabbar',             party: 'Shiv Sena',      admin_ward: 'P/N' },
+  { ward_no: 79,  candidate: 'Juatkar Mansi Madhukar',                party: 'Shiv Sena UBT',  admin_ward: 'P/N' },
+  { ward_no: 80,  candidate: 'Disha Sunil Yadav',                     party: 'BJP',            admin_ward: 'P/N' },
+  { ward_no: 81,  candidate: 'Kesharben Murji Patel',                 party: 'BJP',            admin_ward: 'P/N' },
+  { ward_no: 82,  candidate: 'Amin Jagdishwari Jagadish',             party: 'BJP',            admin_ward: 'P/S' },
+  { ward_no: 84,  candidate: 'Anjali Samant',                         party: 'BJP',            admin_ward: 'P/S' },
+  { ward_no: 85,  candidate: 'Milind Ramnath Shinde',                 party: 'BJP',            admin_ward: 'P/S' },
+  { ward_no: 86,  candidate: 'Rai Ritesh Kamlesh',                    party: 'Shiv Sena',      admin_ward: 'P/S' },
+  { ward_no: 87,  candidate: 'Pooja Mahadeshwar',                     party: 'Shiv Sena UBT',  admin_ward: 'R/C' },
+  { ward_no: 88,  candidate: 'Sharvari Parab',                        party: 'Shiv Sena UBT',  admin_ward: 'R/C' },
+  { ward_no: 89,  candidate: 'Geetesh Raut',                          party: 'Shiv Sena UBT',  admin_ward: 'R/C' },
+  { ward_no: 90,  candidate: 'Tulip Miranda',                         party: 'Congress',       admin_ward: 'R/N' },
+  { ward_no: 91,  candidate: 'Sagun Vasant Naik',                     party: 'Shiv Sena',      admin_ward: 'R/N' },
+  { ward_no: 92,  candidate: 'Mohd. Ibrahim Qureshi',                 party: 'Congress',       admin_ward: 'R/N' },
+  { ward_no: 93,  candidate: 'Rohini Kamle',                          party: 'Shiv Sena UBT',  admin_ward: 'R/N' },
+  { ward_no: 94,  candidate: 'Padma Dipak Bhutkar',                   party: 'Shiv Sena UBT',  admin_ward: 'R/S' },
+  { ward_no: 95,  candidate: 'Hari Jagannath Shastri',                party: 'Shiv Sena UBT',  admin_ward: 'R/S' },
+  { ward_no: 96,  candidate: 'Khan Ayesha Shams',                     party: 'NCP',            admin_ward: 'R/S' },
+  { ward_no: 97,  candidate: 'Hetal Gala',                            party: 'BJP',            admin_ward: 'R/S' },
+  { ward_no: 98,  candidate: 'Alka Subhash Kerkar',                   party: 'BJP',            admin_ward: 'S'   },
+  { ward_no: 99,  candidate: 'Chintamani Dattaram Niwate',            party: 'Shiv Sena UBT',  admin_ward: 'S'   },
+  { ward_no: 100, candidate: 'Swapna Mhatre',                         party: 'BJP',            admin_ward: 'S'   },
+  { ward_no: 101, candidate: 'Aaron Sicilia Demelo',                  party: 'Congress',       admin_ward: 'S'   },
+  { ward_no: 102, candidate: 'Khan Rahebar Siraj',                    party: 'Congress',       admin_ward: 'S'   },
+  { ward_no: 103, candidate: 'Hetal Gala Morvekar',                   party: 'BJP',            admin_ward: 'T'   },
+  { ward_no: 104, candidate: 'Prakash Gangadhare',                    party: 'BJP',            admin_ward: 'T'   },
+  { ward_no: 105, candidate: 'Anita Nandkumar Vaiti',                 party: 'BJP',            admin_ward: 'T'   },
+  { ward_no: 106, candidate: 'Prabhakar Shinde',                      party: 'BJP',            admin_ward: 'T'   },
+  { ward_no: 107, candidate: 'Neil Kirit Somaiya',                    party: 'BJP',            admin_ward: 'T'   },
+  { ward_no: 108, candidate: 'Dipika Message Ghag',                   party: 'BJP',            admin_ward: 'T'   },
+  { ward_no: 109, candidate: 'Suresh Atmaram Shinde',                 party: 'Shiv Sena UBT',  admin_ward: 'S'   },
+  { ward_no: 110, candidate: 'Asha Suresh Koparkar',                  party: 'Congress',       admin_ward: 'S'   },
+  { ward_no: 111, candidate: 'Deepak Sawant',                         party: 'Shiv Sena UBT',  admin_ward: 'S'   },
+  { ward_no: 112, candidate: 'Witness Darvi',                         party: 'BJP',            admin_ward: 'N'   },
+  { ward_no: 113, candidate: 'Dipmala Baban Grow',                    party: 'Shiv Sena UBT',  admin_ward: 'N'   },
+  { ward_no: 114, candidate: 'Rajul Sanjay Patil',                    party: 'Shiv Sena UBT',  admin_ward: 'N'   },
+  { ward_no: 115, candidate: 'Rajbhoj Jyoti Anil',                    party: 'MNS',            admin_ward: 'N'   },
+  { ward_no: 116, candidate: 'Jagriti Prakti Patil',                  party: 'BJP',            admin_ward: 'P/N' },
+  { ward_no: 117, candidate: 'Shweta Pavaskar',                       party: 'Shiv Sena UBT',  admin_ward: 'P/N' },
+  { ward_no: 118, candidate: 'Sunita Chandrashekhar Jadhav',          party: 'Shiv Sena UBT',  admin_ward: 'P/N' },
+  { ward_no: 119, candidate: 'Rajesh Pandhrinath Sonawale',           party: 'Shiv Sena',      admin_ward: 'P/N' },
+  { ward_no: 120, candidate: 'Vishwas Tukaram Shinde',                party: 'Shiv Sena UBT',  admin_ward: 'P/S' },
+  { ward_no: 121, candidate: 'Priyadarshini Thackeray',               party: 'Shiv Sena UBT',  admin_ward: 'P/S' },
+  { ward_no: 122, candidate: 'Chandan Sharma',                        party: 'BJP',            admin_ward: 'P/S' },
+  { ward_no: 123, candidate: 'Sunil More',                            party: 'Shiv Sena UBT',  admin_ward: 'P/S' },
+  { ward_no: 124, candidate: 'Sakina Sheikh',                         party: 'Shiv Sena UBT',  admin_ward: 'R/C' },
+  { ward_no: 125, candidate: 'Suresh Avale',                          party: 'Shiv Sena',      admin_ward: 'R/C' },
+  { ward_no: 126, candidate: 'Archana Bhalerao',                      party: 'BJP',            admin_ward: 'R/C' },
+  { ward_no: 127, candidate: 'Swarupa Tukaram Patil',                 party: 'Shiv Sena UBT',  admin_ward: 'R/N' },
+  { ward_no: 128, candidate: 'Sai Shirke',                            party: 'MNS',            admin_ward: 'R/N' },
+  { ward_no: 129, candidate: 'Ashwini Bharat Mate',                   party: 'BJP',            admin_ward: 'R/N' },
+  { ward_no: 130, candidate: 'Dharmesh Bhupat Giri',                  party: 'BJP',            admin_ward: 'R/S' },
+  { ward_no: 131, candidate: 'Rakhi Harishchandra Jadhav',            party: 'BJP',            admin_ward: 'R/S' },
+  { ward_no: 132, candidate: 'Ritu Rajesh Tawde',                     party: 'BJP',            admin_ward: 'R/S' },
+  { ward_no: 133, candidate: 'Bibhishan Kande',                       party: 'Shiv Sena',      admin_ward: 'K/E' },
+  { ward_no: 134, candidate: 'Mehjabeen Atique Ahmed Khan',           party: 'AIMIM',          admin_ward: 'B'   },
+  { ward_no: 135, candidate: 'Navnath Ban',                           party: 'BJP',            admin_ward: 'B'   },
+  { ward_no: 136, candidate: 'Zameer Murtuza Qureshi',                party: 'AIMIM',          admin_ward: 'B'   },
+  { ward_no: 137, candidate: 'Sameer Patel',                          party: 'AIMIM',          admin_ward: 'C'   },
+  { ward_no: 138, candidate: 'Roshan Irfan Sheikh',                   party: 'AIMIM',          admin_ward: 'C'   },
+  { ward_no: 139, candidate: 'Shabana Atif Sheikh',                   party: 'AIMIM',          admin_ward: 'E'   },
+  { ward_no: 140, candidate: 'Vijay Tatoba Ubale',                    party: 'AIMIM',          admin_ward: 'E'   },
+  { ward_no: 141, candidate: 'Vitthal Govind Lokre',                  party: 'Shiv Sena UBT',  admin_ward: 'F/N' },
+  { ward_no: 142, candidate: 'Aayant Khandekar',                      party: 'Shiv Sena',      admin_ward: 'F/N' },
+  { ward_no: 143, candidate: 'Shabana Mohammad Farooq Qazi',          party: 'AIMIM',          admin_ward: 'F/S' },
+  { ward_no: 144, candidate: 'Dinesh Panchal',                        party: 'BJP',            admin_ward: 'G/N' },
+  { ward_no: 145, candidate: 'Khairunnisa Akbar Hussain',             party: 'AIMIM',          admin_ward: 'G/S' },
+  { ward_no: 146, candidate: 'Samriddhi Ganesh Kate',                 party: 'Shiv Sena',      admin_ward: 'H/E' },
+  { ward_no: 147, candidate: 'Pragya Sadaphule',                      party: 'Shiv Sena',      admin_ward: 'H/E' },
+  { ward_no: 148, candidate: 'Anjali Sanjay Naik',                    party: 'Shiv Sena',      admin_ward: 'H/W' },
+  { ward_no: 149, candidate: 'Sushma Sawant',                         party: 'BJP',            admin_ward: 'H/W' },
+  { ward_no: 150, candidate: 'Vaishali Ajit Shendkar',                party: 'Congress',       admin_ward: 'K/E' },
+  { ward_no: 151, candidate: 'Kashish Phulwaria',                     party: 'BJP',            admin_ward: 'K/E' },
+  { ward_no: 152, candidate: 'Asha Subhash Marathe',                  party: 'BJP',            admin_ward: 'K/W' },
+  { ward_no: 153, candidate: 'Minakshi Patankar',                     party: 'Shiv Sena UBT',  admin_ward: 'K/W' },
+  { ward_no: 154, candidate: 'Mahadev Shivana',                       party: 'BJP',            admin_ward: 'L'   },
+  { ward_no: 155, candidate: 'Snehal Vishnu Shivkar',                 party: 'Shiv Sena UBT',  admin_ward: 'L'   },
+  { ward_no: 156, candidate: 'Ashwini Matekar',                       party: 'Shiv Sena',      admin_ward: 'L'   },
+  { ward_no: 157, candidate: 'Sarita Mhaske',                         party: 'Shiv Sena UBT',  admin_ward: 'M/E' },
+  { ward_no: 158, candidate: 'Chitra Somnath Sangle',                 party: 'Shiv Sena UBT',  admin_ward: 'M/E' },
+  { ward_no: 159, candidate: 'Prakash Devji More',                    party: 'BJP',            admin_ward: 'M/W' },
+  { ward_no: 160, candidate: 'Kiran Landge',                          party: 'Shiv Sena',      admin_ward: 'M/W' },
+  { ward_no: 161, candidate: 'Vijayendra Onkar Shinde',               party: 'Shiv Sena',      admin_ward: 'M/W' },
+  { ward_no: 162, candidate: 'Amir Naseem Khan',                      party: 'Congress',       admin_ward: 'M/W' },
+  { ward_no: 163, candidate: 'Shaila Dilip Lande',                    party: 'Shiv Sena',      admin_ward: 'N'   },
+  { ward_no: 164, candidate: 'Harish Bhandirge',                      party: 'BJP',            admin_ward: 'N'   },
+  { ward_no: 165, candidate: 'Ashraf Azhmi',                          party: 'Congress',       admin_ward: 'M/E' },
+  { ward_no: 166, candidate: 'Meenal Sanjay Turde',                   party: 'Shiv Sena',      admin_ward: 'M/E' },
+  { ward_no: 167, candidate: 'Dr Saman Arshad Azhmi',                 party: 'Congress',       admin_ward: 'M/E' },
+  { ward_no: 168, candidate: 'Dr Saeeda Khan',                        party: 'NCP',            admin_ward: 'M/W' },
+  { ward_no: 169, candidate: 'Pravina Manish Morajkar',               party: 'Shiv Sena UBT',  admin_ward: 'F/S' },
+  { ward_no: 170, candidate: 'Bushra Nadeem Captain Malik',           party: 'NCP',            admin_ward: 'F/S' },
+  { ward_no: 171, candidate: 'Rani Yerunkar',                         party: 'Shiv Sena UBT',  admin_ward: 'G/N' },
+  { ward_no: 172, candidate: 'Rajeshri Rajesh Shirwadkar',            party: 'BJP',            admin_ward: 'G/S' },
+  { ward_no: 173, candidate: 'Shilpa Duttaram Keluskar',              party: 'BJP',            admin_ward: 'G/S' },
+  { ward_no: 174, candidate: 'Kanojia Sakshi Anil',                   party: 'BJP',            admin_ward: 'H/E' },
+  { ward_no: 175, candidate: 'Mansi Satamkar',                        party: 'Shiv Sena',      admin_ward: 'H/E' },
+  { ward_no: 176, candidate: 'Line R. K. Yadav',                      party: 'BJP',            admin_ward: 'H/W' },
+  { ward_no: 177, candidate: 'Kalpesha Jesal Kothari',                party: 'BJP',            admin_ward: 'H/W' },
+  { ward_no: 178, candidate: 'Amey Arun Ghole',                       party: 'Shiv Sena',      admin_ward: 'K/E' },
+  { ward_no: 179, candidate: 'Ayesha Sufiyan Vanu',                   party: 'NCP',            admin_ward: 'K/E' },
+  { ward_no: 180, candidate: 'Trishna Biswasrao',                     party: 'Shiv Sena',      admin_ward: 'K/W' },
+  { ward_no: 181, candidate: 'Anilbhau Kadam',                        party: 'Shiv Sena UBT',  admin_ward: 'L'   },
+  { ward_no: 182, candidate: 'Milind Vaidya',                         party: 'Shiv Sena UBT',  admin_ward: 'L'   },
+  { ward_no: 183, candidate: 'Asha Deepak Kale',                      party: 'Congress',       admin_ward: 'M/W' },
+  { ward_no: 184, candidate: 'Sajida Bi Haji Babbu Khan',             party: 'Congress',       admin_ward: 'M/W' },
+  { ward_no: 185, candidate: 'Jagdish Thewalpeel',                    party: 'Shiv Sena UBT',  admin_ward: 'M/E' },
+  { ward_no: 186, candidate: 'Archana Avirat Shinde',                 party: 'Shiv Sena UBT',  admin_ward: 'M/E' },
+  { ward_no: 187, candidate: 'Joseph Manvel Koli',                    party: 'Shiv Sena UBT',  admin_ward: 'M/E' },
+  { ward_no: 188, candidate: 'Bhaskar Shetty',                        party: 'Shiv Sena',      admin_ward: 'N'   },
+  { ward_no: 189, candidate: 'Harshala Ashish More',                  party: 'Shiv Sena UBT',  admin_ward: 'N'   },
+  { ward_no: 190, candidate: 'Shital Suresh Gambhir',                 party: 'BJP',            admin_ward: 'P/S' },
+  { ward_no: 191, candidate: 'Vishakha Raut',                         party: 'Shiv Sena UBT',  admin_ward: 'P/S' },
+  { ward_no: 192, candidate: 'Yashwant Killedar',                     party: 'MNS',            admin_ward: 'R/C' },
+  { ward_no: 193, candidate: 'Hemangi Hareswar Varlikar',             party: 'Shiv Sena UBT',  admin_ward: 'R/N' },
+  { ward_no: 194, candidate: 'Nishikant Shinde',                      party: 'Shiv Sena UBT',  admin_ward: 'R/N' },
+  { ward_no: 195, candidate: 'Vijay Jagannath Bhange',                party: 'Shiv Sena UBT',  admin_ward: 'R/S' },
+  { ward_no: 196, candidate: 'Padmaja Chemburkar',                    party: 'Shiv Sena UBT',  admin_ward: 'M/W' },
+  { ward_no: 197, candidate: 'Vanita Dattaram Naravankar',            party: 'Shiv Sena',      admin_ward: 'M/W' },
+  { ward_no: 198, candidate: 'Aboli Gopal Khade',                     party: 'Shiv Sena UBT',  admin_ward: 'M/E' },
+  { ward_no: 199, candidate: 'Kishori Kishore Pednekar',              party: 'Shiv Sena UBT',  admin_ward: 'G/N' },
+  { ward_no: 200, candidate: 'Urmila Panchaal',                       party: 'Shiv Sena UBT',  admin_ward: 'G/N' },
+  { ward_no: 201, candidate: 'Iram Sajit Ahmad Siddiqui',             party: 'Samajwadi Party', admin_ward: 'E'  },
+  { ward_no: 202, candidate: 'Shraddha Jadhav',                       party: 'Shiv Sena UBT',  admin_ward: 'F/N' },
+  { ward_no: 203, candidate: 'Shraddha Pednekar',                     party: 'Shiv Sena UBT',  admin_ward: 'F/S' },
+  { ward_no: 204, candidate: 'Kiran Prabhakar Tawde',                 party: 'Shiv Sena UBT',  admin_ward: 'G/S' },
+  { ward_no: 205, candidate: 'Supriya Dilip Dalvi',                   party: 'MNS',            admin_ward: 'H/E' },
+  { ward_no: 206, candidate: 'Sachin Padval',                         party: 'Shiv Sena UBT',  admin_ward: 'H/W' },
+  { ward_no: 207, candidate: 'Rohidas Lokhande',                      party: 'BJP',            admin_ward: 'K/E' },
+  { ward_no: 208, candidate: 'Ramakant Sakharam Rahte',               party: 'Shiv Sena UBT',  admin_ward: 'K/W' },
+  { ward_no: 209, candidate: 'Yamini Jadhav',                         party: 'Shiv Sena',      admin_ward: 'L'   },
+  { ward_no: 210, candidate: 'Sonam Jamsutkar',                       party: 'Shiv Sena UBT',  admin_ward: 'L'   },
+  { ward_no: 211, candidate: 'Waqar Khan',                            party: 'Congress',       admin_ward: 'M/E' },
+  { ward_no: 212, candidate: 'Abrahani Shahzad',                      party: 'Samajwadi Party', admin_ward: 'M/E' },
+  { ward_no: 213, candidate: 'Naseema Javed Juneja',                  party: 'Congress',       admin_ward: 'M/W' },
+  { ward_no: 214, candidate: 'Ajay Patil',                            party: 'BJP',            admin_ward: 'N'   },
+  { ward_no: 215, candidate: 'Santosh Male',                          party: 'BJP',            admin_ward: 'N'   },
+  { ward_no: 216, candidate: 'Rajeshri Mahesh Bhatankar',             party: 'Congress',       admin_ward: 'P/N' },
+  { ward_no: 217, candidate: 'Gaurang Zaveri',                        party: 'BJP',            admin_ward: 'P/S' },
+  { ward_no: 218, candidate: 'Snehal Tendulkar',                      party: 'BJP',            admin_ward: 'R/C' },
+  { ward_no: 219, candidate: 'Sunny Sanap',                           party: 'BJP',            admin_ward: 'R/N' },
+  { ward_no: 220, candidate: 'Sampada Vaibhav Mayekar',               party: 'Shiv Sena UBT',  admin_ward: 'R/S' },
+  { ward_no: 221, candidate: 'Akash Raj Purohit',                     party: 'BJP',            admin_ward: 'S'   },
+  { ward_no: 222, candidate: 'Rita Bharat Makwana',                   party: 'BJP',            admin_ward: 'S'   },
+  { ward_no: 223, candidate: 'Gyanraj Yashwant Nikam',                party: 'Congress',       admin_ward: 'S'   },
+  { ward_no: 224, candidate: 'Parack Ruksana Nurul Amin',             party: 'Congress',       admin_ward: 'T'   },
+  { ward_no: 225, candidate: 'Harshita Ashwin Narwekar',              party: 'BJP',            admin_ward: 'A'   },
+  { ward_no: 226, candidate: 'Makarand Suresh Narwekar',              party: 'BJP',            admin_ward: 'A'   },
+  { ward_no: 227, candidate: 'Gauravi Shivalkar Narwekar',            party: 'BJP',            admin_ward: 'A'   },
 ];
 
 // Lookup: get all prabhags for a given admin ward key
@@ -172,16 +282,37 @@ export function getPrabhagsByAdminWard(adminWard: string): PrabhagInfo[] {
   return MUMBAI_PRABHAGS.filter((p) => p.admin_ward === adminWard);
 }
 
+// Lookup: get MLA for a constituency name (partial match)
+export function getMlaByConstituency(name: string): MlaInfo | undefined {
+  const lower = name.toLowerCase();
+  return MUMBAI_SUBURBAN_MLAS.find(
+    (m) => m.constituency.toLowerCase().includes(lower) || lower.includes(m.constituency.split('-')[1]?.toLowerCase() ?? '')
+  );
+}
+
 // Party → colour mapping for the badge
 export const PARTY_COLOR: Record<string, { bg: string; text: string; border: string }> = {
-  'BJP':       { bg: '#fff7ed', text: '#c2410c', border: '#fed7aa' },
-  'Shiv Sena': { bg: '#fefce8', text: '#a16207', border: '#fde68a' },
-  'Congress':  { bg: '#eff6ff', text: '#1d4ed8', border: '#bfdbfe' },
-  'NCP':       { bg: '#f5f3ff', text: '#6d28d9', border: '#ddd6fe' },
-  'Samajwadi': { bg: '#fdf4ff', text: '#86198f', border: '#f5d0fe' },
-  'AIMIM':     { bg: '#ecfdf5', text: '#065f46', border: '#a7f3d0' },
+  'BJP':              { bg: '#fff7ed', text: '#c2410c', border: '#fed7aa' },
+  'Shiv Sena':        { bg: '#fefce8', text: '#a16207', border: '#fde68a' },
+  'Shiv Sena UBT':    { bg: '#fdf4ff', text: '#7e22ce', border: '#e9d5ff' },
+  'Congress':         { bg: '#eff6ff', text: '#1d4ed8', border: '#bfdbfe' },
+  'NCP':              { bg: '#f5f3ff', text: '#6d28d9', border: '#ddd6fe' },
+  'NCP (SP)':         { bg: '#fdf4ff', text: '#86198f', border: '#f5d0fe' },
+  'NCP (Ajit)':       { bg: '#f5f3ff', text: '#6d28d9', border: '#ddd6fe' },
+  'Samajwadi Party':  { bg: '#fdf4ff', text: '#86198f', border: '#f5d0fe' },
+  'AIMIM':            { bg: '#ecfdf5', text: '#065f46', border: '#a7f3d0' },
+  'MNS':              { bg: '#fff1f2', text: '#be123c', border: '#fecdd3' },
 };
 
 export function getPartyStyle(party: string) {
-  return PARTY_COLOR[party] ?? { bg: '#f9fafb', text: '#374151', border: '#e5e7eb' };
+  // Normalize common variants
+  const key = party.replace('Nationalist Congress Sharadchandra Pawar', 'NCP (SP)')
+                   .replace('Nationalist Congress Party (NCP)', 'NCP')
+                   .replace('Nationalist Congress Party', 'NCP')
+                   .replace('Shiv Sena Shinde Gat', 'Shiv Sena')
+                   .replace('Bharatiya Janata Party', 'BJP')
+                   .replace('Indian National Congress', 'Congress')
+                   .replace('BJJP', 'BJP')
+                   .replace('Nighut - BJP', 'BJP');
+  return PARTY_COLOR[key] ?? { bg: '#f9fafb', text: '#374151', border: '#e5e7eb' };
 }
