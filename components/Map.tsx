@@ -17,30 +17,110 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 });
 
-const MUMBAI: [number, number] = [19.15, 72.94];
-const INITIAL_ZOOM = 10;
+const MUMBAI: [number, number] = [19.076, 72.877];
+const INITIAL_ZOOM = 11;
 
+// All 24 real BMC Administrative Wards with accurate centroids
 export const MUMBAI_AREAS = [
-  { name: 'Colaba',       lat: 18.9067, lng: 72.8147, ward: 'A',   direction: 'South',   zone: 'City' },
-  { name: 'Churchgate',   lat: 18.9322, lng: 72.8264, ward: 'C',   direction: 'South',   zone: 'City' },
-  { name: 'Dadar',        lat: 19.0178, lng: 72.8478, ward: 'G/N', direction: 'Central', zone: 'City' },
-  { name: 'Bandra',       lat: 19.0596, lng: 72.8295, ward: 'H/W', direction: 'West',    zone: 'Suburbs' },
-  { name: 'Andheri',      lat: 19.1136, lng: 72.8697, ward: 'K/W', direction: 'West',    zone: 'Suburbs' },
-  { name: 'Borivali',     lat: 19.2307, lng: 72.8567, ward: 'R/N', direction: 'North',   zone: 'Suburbs' },
-  { name: 'Kurla',        lat: 19.0726, lng: 72.8801, ward: 'L',   direction: 'East',    zone: 'Suburbs' },
-  { name: 'Chembur',      lat: 19.0522, lng: 72.8994, ward: 'M/E', direction: 'East',    zone: 'Suburbs' },
-  { name: 'Malad',        lat: 19.1872, lng: 72.8486, ward: 'P/N', direction: 'North',   zone: 'Suburbs' },
-  { name: 'Ghatkopar',    lat: 19.0868, lng: 72.9084, ward: 'N',   direction: 'East',    zone: 'Suburbs' },
-  { name: 'Thane',        lat: 19.2183, lng: 72.9781, ward: 'T-1', direction: 'East',    zone: 'Thane' },
-  { name: 'Mulund',       lat: 19.1752, lng: 72.9567, ward: 'T',   direction: 'East',    zone: 'Suburbs' },
-  { name: 'Powai',        lat: 19.1197, lng: 72.9051, ward: 'L',   direction: 'East',    zone: 'Suburbs' },
-  { name: 'Juhu',         lat: 19.0990, lng: 72.8267, ward: 'K/W', direction: 'West',    zone: 'Suburbs' },
-  { name: 'Santacruz',    lat: 19.0828, lng: 72.8392, ward: 'H/E', direction: 'West',    zone: 'Suburbs' },
-  { name: 'Vikhroli',     lat: 19.1075, lng: 72.9283, ward: 'S',   direction: 'East',    zone: 'Suburbs' },
-  { name: 'Kandivali',    lat: 19.2052, lng: 72.8562, ward: 'R/N', direction: 'North',   zone: 'Suburbs' },
-  { name: 'Worli',        lat: 19.0117, lng: 72.8174, ward: 'G/S', direction: 'South',   zone: 'City' },
-  { name: 'Lower Parel',  lat: 18.9936, lng: 72.8258, ward: 'G/S', direction: 'South',   zone: 'City' },
-  { name: 'Navi Mumbai',  lat: 19.0330, lng: 73.0297, ward: 'NM',  direction: 'East',    zone: 'Navi Mumbai' },
+  // ── City Zone (Island City) ──────────────────────────────────────────
+  {
+    ward: 'A',   name: 'Colaba / Churchgate',  neighbourhoods: 'Colaba, Navy Nagar, Churchgate, Gateway of India',
+    lat: 18.9120, lng: 72.8230, direction: 'South', zone: 'City',
+  },
+  {
+    ward: 'B',   name: 'Dongri / Bhendi Bazar', neighbourhoods: 'Masjid Bunder, Mohd. Ali Road, Dongri, Nagpada',
+    lat: 18.9500, lng: 72.8380, direction: 'South', zone: 'City',
+  },
+  {
+    ward: 'C',   name: 'Pydhonie / Bhuleshwar', neighbourhoods: 'Pydhonie, Bhuleshwar, Kalbadevi, Crawford Market',
+    lat: 18.9520, lng: 72.8290, direction: 'South', zone: 'City',
+  },
+  {
+    ward: 'D',   name: 'Girgaon / Malabar Hill', neighbourhoods: 'Girgaon, Malabar Hill, Chowpatty, Grant Road',
+    lat: 18.9650, lng: 72.8150, direction: 'South', zone: 'City',
+  },
+  {
+    ward: 'E',   name: 'Byculla / Mazagaon',    neighbourhoods: 'Byculla, Mazagaon, Reay Road, Sewri',
+    lat: 18.9770, lng: 72.8390, direction: 'South', zone: 'City',
+  },
+  {
+    ward: 'F/N', name: 'Matunga / Sion',         neighbourhoods: 'Matunga, Sion, Dharavi (north), Antop Hill',
+    lat: 19.0420, lng: 72.8590, direction: 'Central', zone: 'City',
+  },
+  {
+    ward: 'F/S', name: 'Parel / Lower Parel',    neighbourhoods: 'Parel, Curry Road, Naigaon, Lower Parel',
+    lat: 19.0010, lng: 72.8380, direction: 'Central', zone: 'City',
+  },
+  {
+    ward: 'G/N', name: 'Dadar / Shivaji Park',   neighbourhoods: 'Dadar, Shivaji Park, Mahim, Hindu Colony',
+    lat: 19.0210, lng: 72.8430, direction: 'Central', zone: 'City',
+  },
+  {
+    ward: 'G/S', name: 'Worli / Prabhadevi',     neighbourhoods: 'Worli, Prabhadevi, Elphinstone Road, Lalbaug',
+    lat: 19.0050, lng: 72.8190, direction: 'South', zone: 'City',
+  },
+  // ── Western Suburbs ──────────────────────────────────────────────────
+  {
+    ward: 'H/E', name: 'Bandra East / Dharavi',  neighbourhoods: 'Bandra East, Khar East, Santacruz East, Dharavi',
+    lat: 19.0600, lng: 72.8650, direction: 'East', zone: 'Western Suburbs',
+  },
+  {
+    ward: 'H/W', name: 'Bandra West',             neighbourhoods: 'Bandra West, Khar West, Santacruz West, Carter Road',
+    lat: 19.0550, lng: 72.8250, direction: 'West', zone: 'Western Suburbs',
+  },
+  {
+    ward: 'K/E', name: 'Andheri East / Sakinaka', neighbourhoods: 'Andheri East, Sakinaka, Marol, J.B. Nagar',
+    lat: 19.1130, lng: 72.8820, direction: 'East', zone: 'Western Suburbs',
+  },
+  {
+    ward: 'K/W', name: 'Andheri West / Versova',  neighbourhoods: 'Andheri West, Versova, Oshiwara, Juhu',
+    lat: 19.1180, lng: 72.8350, direction: 'West', zone: 'Western Suburbs',
+  },
+  {
+    ward: 'P/N', name: 'Malad / Kandivali',        neighbourhoods: 'Malad, Kandivali East, Poisar, Charkop',
+    lat: 19.1900, lng: 72.8540, direction: 'North', zone: 'Western Suburbs',
+  },
+  {
+    ward: 'P/S', name: 'Goregaon / Malad West',   neighbourhoods: 'Goregaon, Malad West, Aarey Colony, Film City',
+    lat: 19.1600, lng: 72.8440, direction: 'North', zone: 'Western Suburbs',
+  },
+  {
+    ward: 'R/C', name: 'Kandivali West',           neighbourhoods: 'Kandivali West, Dahisar, Borivali East (part)',
+    lat: 19.2010, lng: 72.8300, direction: 'North', zone: 'Western Suburbs',
+  },
+  {
+    ward: 'R/N', name: 'Borivali North',           neighbourhoods: 'Borivali, Dahisar, Poisar, Eksar',
+    lat: 19.2350, lng: 72.8570, direction: 'North', zone: 'Western Suburbs',
+  },
+  {
+    ward: 'R/S', name: 'Borivali South',           neighbourhoods: 'Borivali South, Kandivali East, Samata Nagar',
+    lat: 19.2100, lng: 72.8690, direction: 'North', zone: 'Western Suburbs',
+  },
+  // ── Eastern Suburbs ──────────────────────────────────────────────────
+  {
+    ward: 'L',   name: 'Kurla / Saki Naka',        neighbourhoods: 'Kurla, Chandivali, Saki Naka, Powai, Tungwa',
+    lat: 19.0740, lng: 72.8920, direction: 'East', zone: 'Eastern Suburbs',
+  },
+  {
+    ward: 'M/E', name: 'Govandi / Chembur East',   neighbourhoods: 'Govandi, Mankhurd, Deonar, Trombay, Anushakti Nagar',
+    lat: 19.0480, lng: 72.9200, direction: 'East', zone: 'Eastern Suburbs',
+  },
+  {
+    ward: 'M/W', name: 'Chembur West',             neighbourhoods: 'Chembur, Mahul, Tilak Nagar, Chunabhatti',
+    lat: 19.0620, lng: 72.8980, direction: 'East', zone: 'Eastern Suburbs',
+  },
+  {
+    ward: 'N',   name: 'Ghatkopar',                neighbourhoods: 'Ghatkopar East & West, Vikhroli, Rajawadi',
+    lat: 19.0860, lng: 72.9090, direction: 'East', zone: 'Eastern Suburbs',
+  },
+  {
+    ward: 'S',   name: 'Vikhroli / Bhandup',        neighbourhoods: 'Vikhroli, Bhandup, Kanjurmarg, Powai (east)',
+    lat: 19.1170, lng: 72.9280, direction: 'East', zone: 'Eastern Suburbs',
+  },
+  {
+    ward: 'T',   name: 'Mulund',                   neighbourhoods: 'Mulund East & West, Nahur, Bhandup North',
+    lat: 19.1760, lng: 72.9560, direction: 'East', zone: 'Eastern Suburbs',
+  },
 ];
 
 export type AreaInfo = typeof MUMBAI_AREAS[0] & { count: number };
@@ -77,20 +157,20 @@ function buildPopupHTML(report: Report): string {
       <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.55) 0%,transparent 50%);pointer-events:none;"></div>
       <div style="position:absolute;bottom:10px;left:12px;">
         <span style="background:${cat?.color ?? '#374151'};color:white;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:0.03em;display:inline-flex;align-items:center;gap:4px;">
-          ${cat?.emoji ?? '📍'} ${cat?.label ?? report.category}
+          ${cat?.emoji ?? '\uD83D\uDCCD'} ${cat?.label ?? report.category}
         </span>
       </div>
     </div>
     <div style="padding:12px 14px 14px;">
       ${report.description ? `<p style="margin:0 0 5px;font-size:13px;color:#1f2937;line-height:1.45;font-weight:500;">${report.description}</p>` : ''}
-      ${report.area_name ? `<p style="margin:0 0 8px;font-size:11px;color:#9ca3af;">📍 ${report.area_name}</p>` : ''}
+      ${report.area_name ? `<p style="margin:0 0 8px;font-size:11px;color:#9ca3af;">\uD83D\uDCCD ${report.area_name}</p>` : ''}
       <div style="display:flex;justify-content:space-between;align-items:center;padding-top:8px;border-top:1px solid #f3f4f6;">
         <span style="font-size:11px;color:#d1d5db;font-weight:500;">${getTimeAgo(report.created_at)}</span>
         <button
           data-report-id="${report.id}"
           data-upvotes="${report.upvotes}"
           style="background:#fef2f2;border:1.5px solid #fecaca;border-radius:999px;padding:5px 14px;font-size:12px;font-weight:700;cursor:pointer;color:#ef4444;font-family:Inter,sans-serif;"
-        >👍 ${report.upvotes}</button>
+        >\uD83D\uDC4D ${report.upvotes}</button>
       </div>
     </div>
   </div>`;
@@ -107,8 +187,9 @@ interface MapInnerProps {
 function MapInner({ reports, activeCategory, showHeatmap, onNewReport, onAreaHover }: MapInnerProps) {
   const map = useMap();
   const clusterGroupRef = useRef<L.MarkerClusterGroup | null>(null);
-  const areaLayersRef = useRef<L.Layer[]>([]);
+  const areaLayersRef   = useRef<L.Layer[]>([]);
 
+  // ── Cluster group ────────────────────────────────────────────────────
   useEffect(() => {
     const group = (L as unknown as { markerClusterGroup: (opts: unknown) => L.MarkerClusterGroup }).markerClusterGroup({
       chunkedLoading: true,
@@ -119,11 +200,11 @@ function MapInner({ reports, activeCategory, showHeatmap, onNewReport, onAreaHov
       iconCreateFunction: (cluster: L.MarkerCluster) => {
         const n = cluster.getChildCount();
         const size = n < 10 ? 38 : n < 30 ? 46 : n < 80 ? 54 : 62;
-        const bg = n < 5 ? '#ef4444' : n < 15 ? '#b91c1c' : '#7f1d1d';
-        const fontSize = n > 99 ? 11 : n > 9 ? 13 : 14;
+        const bg   = n < 5  ? '#ef4444' : n < 15 ? '#b91c1c' : '#7f1d1d';
+        const fs   = n > 99 ? 11 : n > 9 ? 13 : 14;
         return L.divIcon({
           className: '',
-          html: `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${bg};border:3px solid rgba(255,255,255,0.95);box-shadow:0 3px 14px rgba(0,0,0,0.28);display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:${fontSize}px;font-family:Inter,-apple-system,sans-serif;cursor:pointer;">${n}</div>`,
+          html: `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${bg};border:3px solid rgba(255,255,255,0.95);box-shadow:0 3px 14px rgba(0,0,0,0.28);display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:${fs}px;font-family:Inter,-apple-system,sans-serif;cursor:pointer;">${n}</div>`,
           iconSize: [size, size],
           iconAnchor: [size / 2, size / 2],
         });
@@ -134,18 +215,21 @@ function MapInner({ reports, activeCategory, showHeatmap, onNewReport, onAreaHov
     return () => { map.removeLayer(group); };
   }, [map]);
 
+  // ── Report markers ───────────────────────────────────────────────────
   useEffect(() => {
     const group = clusterGroupRef.current;
     if (!group) return;
     group.clearLayers();
-    const filtered = activeCategory === 'all' ? reports : reports.filter((r) => r.category === activeCategory);
+    const filtered = activeCategory === 'all'
+      ? reports
+      : reports.filter((r) => r.category === activeCategory);
     filtered.forEach((report) => {
       const cat = getCategoryById(report.category);
       if (!cat) return;
       const marker = L.marker([report.lat, report.lng], { icon: createCategoryIcon(cat.color, cat.emoji) });
       marker.bindPopup(L.popup({ maxWidth: 300, className: 'pinit-popup' }).setContent(buildPopupHTML(report)));
       marker.on('popupopen', () => {
-        const el = marker.getPopup()?.getElement();
+        const el  = marker.getPopup()?.getElement();
         if (!el) return;
         const btn = el.querySelector<HTMLButtonElement>('button[data-report-id]');
         if (!btn) return;
@@ -153,10 +237,10 @@ function MapInner({ reports, activeCategory, showHeatmap, onNewReport, onAreaHov
           if (btn.dataset.voted) return;
           btn.dataset.voted = '1';
           const n = parseInt(btn.dataset.upvotes ?? '0');
-          btn.innerHTML = `👍 ${n + 1}`;
+          btn.innerHTML = `\uD83D\uDC4D ${n + 1}`;
           btn.style.color = '#9ca3af';
           btn.style.borderColor = '#e5e7eb';
-          btn.style.background = '#f9fafb';
+          btn.style.background  = '#f9fafb';
           await fetch('/api/upvote', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -168,6 +252,7 @@ function MapInner({ reports, activeCategory, showHeatmap, onNewReport, onAreaHov
     });
   }, [reports, activeCategory]);
 
+  // ── BMC Ward labels + hover zones ────────────────────────────────────
   useEffect(() => {
     areaLayersRef.current.forEach((l) => map.removeLayer(l));
     areaLayersRef.current = [];
@@ -176,26 +261,44 @@ function MapInner({ reports, activeCategory, showHeatmap, onNewReport, onAreaHov
       const count = reports.filter((r) => {
         const dLat = r.lat - area.lat;
         const dLng = r.lng - area.lng;
-        return Math.sqrt(dLat * dLat + dLng * dLng) < 0.018;
+        return Math.sqrt(dLat * dLat + dLng * dLng) < 0.025;
       }).length;
 
+      // Two-line label: ward code (small) + area name (larger)
       const labelMarker = L.marker([area.lat, area.lng], {
         icon: L.divIcon({
           className: '',
-          html: `<div style="font-family:Inter,-apple-system,sans-serif;font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.07em;text-shadow:0 1px 3px rgba(255,255,255,0.95),0 1px 8px rgba(255,255,255,0.8);white-space:nowrap;pointer-events:none;user-select:none;">${area.name.toUpperCase()}</div>`,
-          iconSize: [120, 20],
-          iconAnchor: [60, 10],
+          html: `
+            <div style="
+              display:flex;flex-direction:column;align-items:center;
+              pointer-events:none;user-select:none;
+              text-shadow:0 1px 3px rgba(255,255,255,1),0 0 8px rgba(255,255,255,0.9);
+              font-family:Inter,-apple-system,sans-serif;
+            ">
+              <span style="
+                font-size:9px;font-weight:800;color:#ef4444;
+                letter-spacing:0.1em;text-transform:uppercase;line-height:1;
+              ">WARD ${area.ward}</span>
+              <span style="
+                font-size:11px;font-weight:700;color:#1e293b;
+                letter-spacing:0.04em;text-transform:uppercase;line-height:1.2;
+                margin-top:1px;white-space:nowrap;
+              ">${area.name.toUpperCase()}</span>
+            </div>`,
+          iconSize: [160, 30],
+          iconAnchor: [80, 15],
         }),
         interactive: false,
         pane: 'tooltipPane',
       } as L.MarkerOptions);
 
+      // Invisible hover zone
       const hoverMarker = L.marker([area.lat, area.lng], {
         icon: L.divIcon({
           className: '',
-          html: '<div style="width:70px;height:70px;border-radius:50%;"></div>',
-          iconSize: [70, 70],
-          iconAnchor: [35, 35],
+          html: '<div style="width:80px;height:40px;"></div>',
+          iconSize: [80, 40],
+          iconAnchor: [40, 20],
         }),
         opacity: 0,
       });
@@ -209,6 +312,7 @@ function MapInner({ reports, activeCategory, showHeatmap, onNewReport, onAreaHov
     });
   }, [map, reports, onAreaHover]);
 
+  // ── Realtime subscription ────────────────────────────────────────────
   useEffect(() => {
     const channel = supabase
       .channel('reports-realtime')
@@ -222,7 +326,7 @@ function MapInner({ reports, activeCategory, showHeatmap, onNewReport, onAreaHov
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
       (pos) => map.setView([pos.coords.latitude, pos.coords.longitude], 13),
-      () => {}
+      () => {},
     );
   }, [map]);
 
@@ -257,7 +361,7 @@ export default function Map({ totalReports, navbarHeight, onAreaHover, ...props 
         <MapInner {...props} onAreaHover={handleAreaHover} />
       </MapContainer>
 
-      {/* Zoom controls — fixed right edge, below navbar */}
+      {/* Zoom controls */}
       <div style={{
         position: 'fixed',
         top: navbarHeight + 16,
