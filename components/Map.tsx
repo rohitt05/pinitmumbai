@@ -19,9 +19,9 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 });
 
-// Zoomed out to show all of Mumbai + surroundings
-const MUMBAI: [number, number] = [19.076, 72.877];
-const INITIAL_ZOOM = 11;
+// Slightly zoomed out — shows full Mumbai + Thane + Navi Mumbai at a glance
+const MUMBAI: [number, number] = [19.15, 72.94];
+const INITIAL_ZOOM = 10;
 
 function createCategoryIcon(color: string, emoji: string) {
   return L.divIcon({
@@ -149,11 +149,11 @@ function MapInner({ reports, activeCategory, showHeatmap, onNewReport }: MapInne
     return () => { supabase.removeChannel(channel); };
   }, [onNewReport]);
 
-  // On load, try GPS — if denied just stay at the zoomed-out city view
+  // On load, try GPS — if denied stay at the zoomed-out city view
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
       (pos) => map.setView([pos.coords.latitude, pos.coords.longitude], 14),
-      () => {} // stay at MUMBAI z11
+      () => {} // stay at MUMBAI z10
     );
   }, [map]);
 

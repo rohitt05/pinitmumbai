@@ -6,55 +6,108 @@ import { CATEGORIES } from '@/lib/categories';
 interface FilterBarProps {
   active: string;
   onChange: (id: string) => void;
+  totalCount?: number;
 }
 
 const ALL = { id: 'all', label: 'All', emoji: '', color: '#111827' };
 const ITEMS = [ALL, ...CATEGORIES];
 
-export default function FilterBar({ active, onChange }: FilterBarProps) {
+export default function FilterBar({ active, onChange, totalCount }: FilterBarProps) {
   return (
-    <div style={{
-      background: 'rgba(255,255,255,0.94)',
-      backdropFilter: 'blur(20px)',
-      WebkitBackdropFilter: 'blur(20px)',
-      borderBottom: '1px solid rgba(0,0,0,0.07)',
-      boxShadow: '0 1px 12px rgba(0,0,0,0.07)',
-      // Two-zone row: brand left | chips right (scrollable)
-      display: 'grid',
-      gridTemplateColumns: 'auto 1fr',
-      alignItems: 'center',
-      height: 56,
-      paddingLeft: 16,
-    }}>
+    <div
+      style={{
+        position: 'relative',
+        background: 'rgba(255, 255, 255, 0.88)',
+        backdropFilter: 'blur(24px)',
+        WebkitBackdropFilter: 'blur(24px)',
+        borderBottom: '1px solid rgba(0,0,0,0.055)',
+      }}
+    >
+      {/* ── Top row: wordmark + live badge ── */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '14px 18px 0',
+        }}
+      >
+        {/* Wordmark */}
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+          <span
+            style={{
+              fontFamily: 'Inter, sans-serif',
+              fontSize: 20,
+              fontWeight: 800,
+              color: '#0f172a',
+              letterSpacing: '-0.045em',
+              lineHeight: 1,
+            }}
+          >
+            PinIt
+          </span>
+          <span
+            style={{
+              fontFamily: 'Inter, sans-serif',
+              fontSize: 20,
+              fontWeight: 300,
+              color: '#94a3b8',
+              letterSpacing: '-0.03em',
+              lineHeight: 1,
+            }}
+          >
+            Mumbai
+          </span>
+        </div>
 
-      {/* Brand — left, fixed, never scrolls */}
-      <div style={{
-        display: 'flex', alignItems: 'center', gap: 7,
-        paddingRight: 14,
-        borderRight: '1px solid rgba(0,0,0,0.08)',
-        flexShrink: 0,
-      }}>
-        <span style={{ fontSize: 18, lineHeight: 1 }}>📍</span>
-        <span style={{
-          fontFamily: 'Inter, sans-serif',
-          fontSize: 15,
-          fontWeight: 800,
-          color: '#111827',
-          letterSpacing: '-0.03em',
-          whiteSpace: 'nowrap',
-        }}>PinIt</span>
+        {/* Live pill */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            background: '#fff1f2',
+            border: '1px solid #fecdd3',
+            borderRadius: 999,
+            padding: '4px 10px',
+          }}
+        >
+          <span
+            style={{
+              width: 6,
+              height: 6,
+              borderRadius: '50%',
+              background: '#ef4444',
+              display: 'inline-block',
+              flexShrink: 0,
+            }}
+            className="animate-pulse-dot"
+          />
+          <span
+            style={{
+              fontFamily: 'Inter, sans-serif',
+              fontSize: 11,
+              fontWeight: 600,
+              color: '#ef4444',
+              letterSpacing: '0.02em',
+            }}
+          >
+            {totalCount != null ? `${totalCount} live` : 'Live'}
+          </span>
+        </div>
       </div>
 
-      {/* Filter chips — right zone, horizontally scrollable */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 6,
-        overflowX: 'auto',
-        scrollbarWidth: 'none',
-        padding: '0 14px',
-        height: '100%',
-      }}>
+      {/* ── Bottom row: filter chips ── */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 4,
+          overflowX: 'auto',
+          scrollbarWidth: 'none',
+          padding: '8px 16px 12px',
+        }}
+      >
         <LayoutGroup>
           {ITEMS.map((cat) => {
             const isActive = active === cat.id;
@@ -62,38 +115,44 @@ export default function FilterBar({ active, onChange }: FilterBarProps) {
               <motion.button
                 key={cat.id}
                 onClick={() => onChange(cat.id)}
-                whileTap={{ scale: 0.9 }}
+                whileTap={{ scale: 0.88 }}
                 style={{
                   position: 'relative',
                   flexShrink: 0,
-                  display: 'flex', alignItems: 'center', gap: 5,
-                  padding: '5px 13px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 4,
+                  padding: '5px 12px',
                   borderRadius: 999,
                   border: 'none',
                   background: 'transparent',
-                  color: isActive ? 'white' : '#6b7280',
+                  color: isActive ? 'white' : '#64748b',
                   fontSize: 12,
                   fontWeight: 600,
                   cursor: 'pointer',
                   fontFamily: 'Inter, sans-serif',
                   whiteSpace: 'nowrap',
                   zIndex: 1,
-                  letterSpacing: '-0.01em',
+                  letterSpacing: '-0.005em',
+                  transition: 'color 180ms ease',
                 }}
               >
                 {isActive && (
                   <motion.div
                     layoutId="filter-pill"
                     style={{
-                      position: 'absolute', inset: 0,
+                      position: 'absolute',
+                      inset: 0,
                       borderRadius: 999,
-                      background: cat.color,
+                      background: cat.id === 'all' ? '#0f172a' : cat.color,
                       zIndex: -1,
                     }}
-                    transition={{ type: 'spring', stiffness: 420, damping: 32 }}
+                    transition={{ type: 'spring', stiffness: 480, damping: 36 }}
                   />
                 )}
-                {cat.emoji && <span style={{ fontSize: 13 }}>{cat.emoji}</span>}
+                {cat.emoji && (
+                  <span style={{ fontSize: 12, lineHeight: 1 }}>{cat.emoji}</span>
+                )}
                 <span>{cat.label}</span>
               </motion.button>
             );

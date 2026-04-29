@@ -75,14 +75,18 @@ export default function HomePage() {
         onNewReport={handleNewReport}
       />
 
-      {/* FilterBar */}
+      {/* FilterBar — now receives totalCount for the live pill */}
       <div style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000 }}>
-        <FilterBar active={activeCategory} onChange={setActiveCategory} />
+        <FilterBar
+          active={activeCategory}
+          onChange={setActiveCategory}
+          totalCount={reports.length}
+        />
       </div>
 
       {/* Top-right controls */}
       <div style={{
-        position: 'fixed', top: 68, right: 12, zIndex: 1000,
+        position: 'fixed', top: 80, right: 12, zIndex: 1000,
         display: 'flex', flexDirection: 'column', gap: 8,
       }}>
         <motion.button
@@ -135,7 +139,6 @@ export default function HomePage() {
 
       {/* Report FAB */}
       <div style={{ position: 'fixed', bottom: 32, right: 20, zIndex: 1000 }}>
-        {/* Ping ring */}
         <span style={{
           position: 'absolute', inset: 0,
           borderRadius: 999,
