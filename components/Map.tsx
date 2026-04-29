@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 import { MapContainer, TileLayer, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -61,6 +61,10 @@ export type AreaInfo = {
   direction: string;
   zone: string;
   count: number;
+  // constituency fields (optional – present when hovering a constituency)
+  constituency?: string;
+  ac_no?: number;
+  pc_name?: string;
 };
 
 // Keep MUMBAI_AREAS for backward-compat with StatsCard key usage
@@ -123,6 +127,7 @@ interface MapInnerProps {
   reports: Report[];
   activeCategory: string;
   showHeatmap: boolean;
+  showConstituencies: boolean;
   onNewReport: (r: Report) => void;
   onAreaHover: (area: AreaInfo | null) => void;
 }
@@ -134,11 +139,27 @@ function getWardFill(count: number) {
   return              { color: 'rgba(239,68,68,0.18)',   border: 'rgba(239,68,68,0.65)'  };
 }
 
-function MapInner({ reports, activeCategory, showHeatmap, onNewReport, onAreaHover }: MapInnerProps) {
+// Distinct pastel colours cycling through 36 assembly constituencies
+const AC_PALETTE = [
+  'rgba(139,92,246,0.13)', 'rgba(59,130,246,0.13)', 'rgba(16,185,129,0.13)',
+  'rgba(245,158,11,0.13)', 'rgba(239,68,68,0.13)',  'rgba(236,72,153,0.13)',
+  'rgba(20,184,166,0.13)', 'rgba(249,115,22,0.13)', 'rgba(99,102,241,0.13)',
+  'rgba(34,211,238,0.13)', 'rgba(132,204,22,0.13)', 'rgba(251,191,36,0.13)',
+];
+const AC_BORDER_PALETTE = [
+  'rgba(139,92,246,0.55)', 'rgba(59,130,246,0.55)', 'rgba(16,185,129,0.55)',
+  'rgba(245,158,11,0.55)', 'rgba(239,68,68,0.55)',  'rgba(236,72,153,0.55)',
+  'rgba(20,184,166,0.55)', 'rgba(249,115,22,0.55)', 'rgba(99,102,241,0.55)',
+  'rgba(34,211,238,0.55)', 'rgba(132,204,22,0.55)', 'rgba(251,191,36,0.55)',
+];
+
+function MapInner({ reports, activeCategory, showHeatmap, showConstituencies, onNewReport, onAreaHover }: MapInnerProps) {
   const map = useMap();
-  const clusterGroupRef = useRef<L.MarkerClusterGroup | null>(null);
-  const wardLayerRef    = useRef<L.GeoJSON | null>(null);
-  const labelLayersRef  = useRef<L.Layer[]>([]);
+  const clusterGroupRef      = useRef<L.MarkerClusterGroup | null>(null);
+  const wardLayerRef         = useRef<L.GeoJSON | null>(null);
+  const labelLayersRef       = useRef<L.Layer[]>([]);
+  const constituencyLayerRef = useRef<L.GeoJSON | null>(null);
+  const acLabelLayersRef     = useRef<L.Layer[]>([]);
 
   // ── Cluster group setup ────────────────────────────────────────────────
   useEffect(() => {
@@ -193,7 +214,6 @@ function MapInner({ reports, activeCategory, showHeatmap, onNewReport, onAreaHov
 
   // ── Official BMC ward polygons (GeoJSON) + labels ────────────────────────
   useEffect(() => {
-    // Remove previous layers
     if (wardLayerRef.current) { map.removeLayer(wardLayerRef.current); wardLayerRef.current = null; }
     labelLayersRef.current.forEach((l) => map.removeLayer(l));
     labelLayersRef.current = [];
@@ -203,32 +223,23 @@ function MapInner({ reports, activeCategory, showHeatmap, onNewReport, onAreaHov
     fetch(GEOJSON_URL)
       .then((r) => r.json())
       .then((geojson) => {
-        // Build ward -> report count lookup
         const countByWard: Record<string, number> = {};
         Object.keys(BMC_WARD_INFO).forEach((w) => { countByWard[w] = 0; });
 
         const wardLayer = L.geoJSON(geojson, {
           style: (feature) => {
-            // GeoJSON property key may be "ward", "WARD", "ward_no", "WardName" — handle all
             const raw: string = (
               feature?.properties?.ward ??
               feature?.properties?.WARD ??
               feature?.properties?.WardName ??
               feature?.properties?.ward_no ??
+              feature?.properties?.name ??
               ''
             ).toString().trim().toUpperCase();
-
-            // normalise: "FN" -> "F/N", "HE" -> "H/E" etc.
             const wardKey = raw.replace(/^([A-Z]+)([NS]|E|W|C)$/, '$1/$2');
             const count = countByWard[wardKey] ?? 0;
             const fill  = getWardFill(count);
-            return {
-              fillColor:   fill.color,
-              fillOpacity: 1,
-              color:       fill.border,
-              weight:      1.5,
-              opacity:     1,
-            };
+            return { fillColor: fill.color, fillOpacity: 1, color: fill.border, weight: 1.5, opacity: 1 };
           },
           onEachFeature: (feature, layer) => {
             const raw: string = (
@@ -236,26 +247,20 @@ function MapInner({ reports, activeCategory, showHeatmap, onNewReport, onAreaHov
               feature?.properties?.WARD ??
               feature?.properties?.WardName ??
               feature?.properties?.ward_no ??
+              feature?.properties?.name ??
               ''
             ).toString().trim().toUpperCase();
             const wardKey = raw.replace(/^([A-Z]+)([NS]|E|W|C)$/, '$1/$2');
             const info = BMC_WARD_INFO[wardKey];
 
-            // Count reports inside this polygon using centroid proximity
             const bounds = (layer as L.Path).getBounds?.();
             const count = bounds
-              ? reports.filter((r) => {
-                  const ll = L.latLng(r.lat, r.lng);
-                  return bounds.contains(ll);
-                }).length
+              ? reports.filter((r) => { const ll = L.latLng(r.lat, r.lng); return bounds.contains(ll); }).length
               : 0;
-
             countByWard[wardKey] = count;
 
             if (!info) return;
-
             const poly = layer as L.Polygon;
-
             poly.on('mouseover', () => {
               poly.setStyle({ fillOpacity: 1, weight: 2.5, color: '#ef4444' });
               onAreaHover({ ward: wardKey, ...info, count });
@@ -271,7 +276,6 @@ function MapInner({ reports, activeCategory, showHeatmap, onNewReport, onAreaHov
         wardLayer.addTo(map);
         wardLayerRef.current = wardLayer;
 
-        // Now add centroid labels for each feature
         wardLayer.eachLayer((layer) => {
           const feature = (layer as L.GeoJSON & { feature: GeoJSON.Feature }).feature;
           const raw: string = (
@@ -279,6 +283,7 @@ function MapInner({ reports, activeCategory, showHeatmap, onNewReport, onAreaHov
             feature?.properties?.WARD ??
             feature?.properties?.WardName ??
             feature?.properties?.ward_no ??
+            feature?.properties?.name ??
             ''
           ).toString().trim().toUpperCase();
           const wardKey = raw.replace(/^([A-Z]+)([NS]|E|W|C)$/, '$1/$2');
@@ -321,6 +326,135 @@ function MapInner({ reports, activeCategory, showHeatmap, onNewReport, onAreaHov
     };
   }, [map, reports, onAreaHover]);
 
+  // ── Assembly constituency overlay ────────────────────────────────────
+  useEffect(() => {
+    // Remove old constituency layer
+    if (constituencyLayerRef.current) { map.removeLayer(constituencyLayerRef.current); constituencyLayerRef.current = null; }
+    acLabelLayersRef.current.forEach((l) => map.removeLayer(l));
+    acLabelLayersRef.current = [];
+
+    if (!showConstituencies) return;
+
+    const AC_GEOJSON_URL = 'https://raw.githubusercontent.com/sanjanakrishnan/mumbai_spatial_data/fda8a45d4c6742cd5405f461a41ccbacc20ff29e/elections_2019/mumbai_assembly_2019.geojson';
+
+    fetch(AC_GEOJSON_URL)
+      .then((r) => r.json())
+      .then((geojson) => {
+        // Build a stable colour index by AC_NO so colours are deterministic
+        const acNos: number[] = [];
+        (geojson.features as GeoJSON.Feature[]).forEach((f) => {
+          const no = (f.properties as Record<string, unknown>)?.AC_NO as number;
+          if (no && !acNos.includes(no)) acNos.push(no);
+        });
+        acNos.sort((a, b) => a - b);
+        const acColorIndex: Record<number, number> = {};
+        acNos.forEach((no, i) => { acColorIndex[no] = i % AC_PALETTE.length; });
+
+        const acLayer = L.geoJSON(geojson, {
+          style: (feature) => {
+            const props = feature?.properties as Record<string, unknown>;
+            const acNo  = props?.AC_NO as number;
+            const ci    = acColorIndex[acNo] ?? 0;
+            return {
+              fillColor:   AC_PALETTE[ci],
+              fillOpacity: 1,
+              color:       AC_BORDER_PALETTE[ci],
+              weight:      2,
+              opacity:     1,
+              dashArray:   '5,4',
+            };
+          },
+          onEachFeature: (feature, layer) => {
+            const props       = feature.properties as Record<string, unknown>;
+            const acName: string  = (props?.AC_NAME as string) ?? 'Unknown';
+            const acNo: number    = props?.AC_NO as number;
+            const pcName: string  = (props?.PC_NAME as string) ?? '';
+            const ci = acColorIndex[acNo] ?? 0;
+
+            if (!acName) return;
+            const poly = layer as L.Polygon;
+
+            poly.on('mouseover', () => {
+              poly.setStyle({ weight: 3, dashArray: '', color: AC_BORDER_PALETTE[ci] });
+              // Fire onAreaHover with constituency info — fill dummy ward fields
+              onAreaHover({
+                ward: '',
+                name: acName,
+                neighbourhoods: `AC No. ${acNo} · ${pcName}`,
+                direction: '',
+                zone: 'Assembly Constituency',
+                count: reports.filter((r) => {
+                  const b = poly.getBounds();
+                  return b.contains(L.latLng(r.lat, r.lng));
+                }).length,
+                constituency: acName,
+                ac_no: acNo,
+                pc_name: pcName,
+              });
+            });
+            poly.on('mouseout', () => {
+              poly.setStyle({ weight: 2, dashArray: '5,4', color: AC_BORDER_PALETTE[ci] });
+              onAreaHover(null);
+            });
+          },
+        });
+
+        acLayer.addTo(map);
+        constituencyLayerRef.current = acLayer;
+
+        // Add constituency name labels
+        acLayer.eachLayer((layer) => {
+          const feature = (layer as L.GeoJSON & { feature: GeoJSON.Feature }).feature;
+          const props   = feature.properties as Record<string, unknown>;
+          const acName: string = (props?.AC_NAME as string) ?? '';
+          const acNo: number   = props?.AC_NO as number;
+          if (!acName) return;
+
+          const poly   = layer as L.Polygon;
+          const center = poly.getBounds().getCenter();
+          const ci     = acColorIndex[acNo] ?? 0;
+          // derive a readable hex from the border palette for the label colour
+          const borderRgba = AC_BORDER_PALETTE[ci];
+          // Extract hex-ish color for text: use a fixed set matching palette order
+          const labelColors = [
+            '#7c3aed','#1d4ed8','#065f46','#b45309','#b91c1c','#9d174d',
+            '#0f766e','#c2410c','#4338ca','#0e7490','#4d7c0f','#b45309',
+          ];
+          const labelColor = labelColors[ci % labelColors.length];
+
+          const label = L.marker(center, {
+            icon: L.divIcon({
+              className: '',
+              html: `
+                <div style="
+                  display:flex;flex-direction:column;align-items:center;
+                  pointer-events:none;user-select:none;
+                  font-family:Inter,-apple-system,sans-serif;
+                  text-shadow:0 1px 4px rgba(255,255,255,0.95),0 0 12px rgba(255,255,255,0.85);
+                ">
+                  <span style="font-size:8px;font-weight:800;color:${labelColor};letter-spacing:0.14em;line-height:1;opacity:0.75;">AC ${acNo}</span>
+                  <span style="font-size:9.5px;font-weight:800;color:${labelColor};letter-spacing:0.04em;line-height:1.3;white-space:nowrap;">${acName.toUpperCase()}</span>
+                </div>`,
+              iconSize: [180, 28],
+              iconAnchor: [90, 14],
+            }),
+            interactive: false,
+            pane: 'tooltipPane',
+          } as L.MarkerOptions);
+
+          map.addLayer(label);
+          acLabelLayersRef.current.push(label);
+        });
+      })
+      .catch(console.error);
+
+    return () => {
+      if (constituencyLayerRef.current) { map.removeLayer(constituencyLayerRef.current); constituencyLayerRef.current = null; }
+      acLabelLayersRef.current.forEach((l) => map.removeLayer(l));
+      acLabelLayersRef.current = [];
+    };
+  }, [map, showConstituencies, reports, onAreaHover]);
+
   // ── Realtime subscription ────────────────────────────────────────────
   useEffect(() => {
     const channel = supabase
@@ -352,6 +486,10 @@ export default function Map({ totalReports, navbarHeight, onAreaHover, ...props 
   const mapRef = useRef<L.Map | null>(null);
   const handleAreaHover = useCallback((a: AreaInfo | null) => onAreaHover(a), [onAreaHover]);
 
+  // showConstituencies toggle — wired in through props, but also expose a
+  // default so it works if the parent hasn't wired it yet.
+  const showConstituencies = (props as unknown as { showConstituencies?: boolean }).showConstituencies ?? false;
+
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
       <MapContainer
@@ -367,7 +505,11 @@ export default function Map({ totalReports, navbarHeight, onAreaHover, ...props 
           subdomains="abcd"
           maxZoom={20}
         />
-        <MapInner {...props} onAreaHover={handleAreaHover} />
+        <MapInner
+          {...props}
+          showConstituencies={showConstituencies}
+          onAreaHover={handleAreaHover}
+        />
       </MapContainer>
 
       {/* Zoom controls */}
@@ -388,6 +530,39 @@ export default function Map({ totalReports, navbarHeight, onAreaHover, ...props 
           display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 300, lineHeight: 1,
         }}>−</button>
       </div>
+
+      {/* Constituency toggle pill */}
+      <button
+        onClick={() => {
+          // Bubble up via a custom DOM event so parent page can toggle state
+          mapRef.current?.getContainer().dispatchEvent(
+            new CustomEvent('toggle-constituencies', { bubbles: true })
+          );
+        }}
+        style={{
+          position: 'fixed',
+          bottom: navbarHeight + 24,
+          right: 16,
+          zIndex: 900,
+          background: showConstituencies ? '#7c3aed' : 'white',
+          color: showConstituencies ? 'white' : '#374151',
+          border: `1.5px solid ${showConstituencies ? '#7c3aed' : '#e5e7eb'}`,
+          borderRadius: 999,
+          padding: '7px 14px',
+          fontSize: 12,
+          fontWeight: 700,
+          fontFamily: 'Inter,-apple-system,sans-serif',
+          cursor: 'pointer',
+          boxShadow: '0 2px 10px rgba(0,0,0,0.10)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 6,
+          letterSpacing: '0.03em',
+          transition: 'all 0.18s',
+        }}
+      >
+        🏛️ Constituencies
+      </button>
     </div>
   );
 }
