@@ -14,11 +14,11 @@ interface FilterBarProps {
 const ALL = { id: 'all', label: 'All', emoji: '', color: '#0f172a' };
 const ITEMS = [ALL, ...CATEGORIES];
 
-export default function FilterBar({ active, onChange, totalReports, todayCount, onOpenModal }: FilterBarProps) {
+export default function FilterBar({ active, onChange, totalReports, onOpenModal }: FilterBarProps) {
   return (
     <div style={{ fontFamily: 'Inter, sans-serif', background: 'white' }}>
 
-      {/* ━━ Row 1: Wordmark + social icon ━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+      {/* ━━ Row 1: Wordmark + social icon ━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
       <div style={{
         display: 'flex', alignItems: 'center',
         justifyContent: 'space-between',
@@ -72,54 +72,39 @@ export default function FilterBar({ active, onChange, totalReports, todayCount, 
           }}>v1.0</span>
         </div>
 
-        {/* Right icon */}
-        <button style={{
-          width: 34, height: 34, borderRadius: '50%',
-          border: '1.5px solid #e5e7eb', background: 'white',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          cursor: 'pointer', fontSize: 15, color: '#374151',
-        }}>📸</button>
-      </div>
-
-      {/* ━━ Row 2: Announcement banner ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
-      <div style={{
-        background: '#fef3c7',
-        borderBottom: '1px solid #fde68a',
-        padding: '8px 20px',
-        display: 'flex', alignItems: 'center',
-        justifyContent: 'space-between', gap: 10,
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: 14 }}>📣</span>
-          <span style={{ fontSize: 12, color: '#374151', fontWeight: 500 }}>
-            Help fix Mumbai —{' '}
-            <span style={{ color: '#b45309', fontWeight: 700 }}>drop a pin, change the city</span>
-          </span>
-        </div>
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: 5,
-          background: 'rgba(239,68,68,0.08)', border: '1px solid #fca5a5',
-          borderRadius: 999, padding: '3px 9px', flexShrink: 0,
-        }}>
-          <span style={{
-            width: 6, height: 6, borderRadius: '50%',
-            background: '#ef4444', display: 'inline-block',
-          }} className="animate-pulse-dot" />
-          <span style={{ fontSize: 11, fontWeight: 600, color: '#ef4444' }}>
-            {totalReports} live
-          </span>
+        {/* Right: live pill + icon */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 5,
+            background: 'rgba(239,68,68,0.07)', border: '1px solid #fca5a5',
+            borderRadius: 999, padding: '4px 10px',
+          }}>
+            <span style={{
+              width: 6, height: 6, borderRadius: '50%',
+              background: '#ef4444', display: 'inline-block',
+            }} className="animate-pulse-dot" />
+            <span style={{ fontSize: 11, fontWeight: 600, color: '#ef4444' }}>
+              {totalReports} live
+            </span>
+          </div>
+          <button style={{
+            width: 34, height: 34, borderRadius: '50%',
+            border: '1.5px solid #e5e7eb', background: 'white',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'pointer', fontSize: 15, color: '#374151',
+          }}>📸</button>
         </div>
       </div>
 
-      {/* ━━ Row 3: Category filter chips ━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+      {/* ━━ Row 2: Category filter chips + Map/List toggle ━━━━━━━━━━━━ */}
       <div style={{
         display: 'flex', alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '7px 16px',
+        padding: '7px 16px 8px',
         borderBottom: '1px solid rgba(0,0,0,0.06)',
         gap: 8,
       }}>
-        {/* Chips — scrollable left side */}
+        {/* Chips — scrollable */}
         <div style={{
           display: 'flex', alignItems: 'center', gap: 5,
           overflowX: 'auto', scrollbarWidth: 'none', flex: 1,
@@ -165,9 +150,9 @@ export default function FilterBar({ active, onChange, totalReports, todayCount, 
           </LayoutGroup>
         </div>
 
-        {/* Map / List toggle — right side (Map only for now) */}
+        {/* Map / List toggle */}
         <div style={{
-          display: 'flex', alignItems: 'center', gap: 1,
+          display: 'flex', alignItems: 'center',
           border: '1px solid #e5e7eb', borderRadius: 8,
           overflow: 'hidden', flexShrink: 0,
         }}>
