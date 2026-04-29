@@ -9,6 +9,7 @@ import { Report } from '@/types/report';
 import { getCategoryById } from '@/lib/categories';
 import { supabase } from '@/lib/supabase';
 import HotspotLayer from './HotspotLayer';
+import LocalityLayer from './LocalityLayer';
 
 delete (L.Icon.Default.prototype as unknown as Record<string, unknown>)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -104,12 +105,16 @@ interface MapInnerProps {
   activeCategory: string;
   showHeatmap: boolean;
   showConstituencies: boolean;
+  showLocalities: boolean;
   onNewReport: (r: Report) => void;
   onAreaHover: (area: AreaInfo | null) => void;
   onPinClick: (report: Report) => void;
 }
 
-function MapInner({ reports, activeCategory, showHeatmap, showConstituencies, onNewReport, onAreaHover, onPinClick }: MapInnerProps) {
+function MapInner({
+  reports, activeCategory, showHeatmap, showConstituencies,
+  showLocalities, onNewReport, onAreaHover, onPinClick,
+}: MapInnerProps) {
   const map = useMap();
   const clusterGroupRef      = useRef<L.MarkerClusterGroup | null>(null);
   const wardLayerRef         = useRef<L.GeoJSON | null>(null);
@@ -149,7 +154,7 @@ function MapInner({ reports, activeCategory, showHeatmap, showConstituencies, on
     return () => { map.removeLayer(group); };
   }, [map]);
 
-  // Markers — click fires onPinClick, no Leaflet popup
+  // Markers
   useEffect(() => {
     const group = clusterGroupRef.current;
     if (!group) return;
@@ -247,10 +252,15 @@ function MapInner({ reports, activeCategory, showHeatmap, showConstituencies, on
     );
   }, [map]);
 
-  return <HotspotLayer reports={reports} visible={showHeatmap} />;
+  return (
+    <>
+      <HotspotLayer reports={reports} visible={showHeatmap} />
+      <LocalityLayer visible={showLocalities} reports={reports} />
+    </>
+  );
 }
 
-interface MapProps extends Omit<MapInnerProps, 'showConstituencies'> {
+interface MapProps extends Omit<MapInnerProps, 'showConstituencies' | 'showLocalities'> {
   totalReports: number;
   navbarHeight: number;
   showConstituencies?: boolean;
@@ -259,10 +269,9 @@ interface MapProps extends Omit<MapInnerProps, 'showConstituencies'> {
 export default function Map({ totalReports, navbarHeight, onPinClick, ...props }: MapProps) {
   const mapRef = useRef<L.Map | null>(null);
   const handleAreaHover = useCallback((a: AreaInfo | null) => props.onAreaHover(a), [props.onAreaHover]);
-  const handlePinClick = useCallback((r: Report) => onPinClick(r), [onPinClick]);
-  const [showConstituencies, setShowConstituencies] = useState(
-    props.showConstituencies ?? false
-  );
+  const handlePinClick  = useCallback((r: Report) => onPinClick(r), [onPinClick]);
+  const [showConstituencies, setShowConstituencies] = useState(props.showConstituencies ?? false);
+  const [showLocalities, setShowLocalities]         = useState(false);
 
   useEffect(() => {
     if (props.showConstituencies !== undefined) setShowConstituencies(props.showConstituencies);
@@ -286,6 +295,7 @@ export default function Map({ totalReports, navbarHeight, onPinClick, ...props }
         <MapInner
           {...props}
           showConstituencies={showConstituencies}
+          showLocalities={showLocalities}
           onAreaHover={handleAreaHover}
           onPinClick={handlePinClick}
         />
@@ -310,23 +320,57 @@ export default function Map({ totalReports, navbarHeight, onPinClick, ...props }
         }}>−</button>
       </div>
 
-      {/* Constituency toggle */}
-      <button
-        onClick={() => setShowConstituencies(prev => !prev)}
-        style={{
-          position: 'fixed', bottom: navbarHeight + 24, right: 16, zIndex: 900,
-          background: showConstituencies ? '#7c3aed' : 'white',
-          color: showConstituencies ? 'white' : '#374151',
-          border: `1.5px solid ${showConstituencies ? '#7c3aed' : '#e5e7eb'}`,
-          borderRadius: 999, padding: '7px 14px',
-          fontSize: 12, fontWeight: 700, fontFamily: 'Inter,-apple-system,sans-serif',
-          cursor: 'pointer', boxShadow: '0 2px 10px rgba(0,0,0,0.10)',
-          display: 'flex', alignItems: 'center', gap: 6,
-          letterSpacing: '0.03em', transition: 'all 0.18s',
-        }}
-      >
-        🏛️ Constituencies
-      </button>
+      {/* Map layer toggles — stacked vertically above BottomBar */}
+      <div style={{
+        position: 'fixed', bottom: navbarHeight + 24, right: 16, zIndex: 900,
+        display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-end',
+      }}>
+
+        {/* Localities toggle */}
+        <button
+          onClick={() => setShowLocalities((p) => !p)}
+          style={{
+            background: showLocalities ? '#991b1b' : 'white',
+            color: showLocalities ? 'white' : '#374151',
+            border: `1.5px solid ${showLocalities ? '#991b1b' : '#e5e7eb'}`,
+            borderRadius: 999, padding: '7px 14px',
+            fontSize: 12, fontWeight: 700,
+            fontFamily: 'Inter,-apple-system,sans-serif',
+            cursor: 'pointer',
+            boxShadow: '0 2px 10px rgba(0,0,0,0.10)',
+            display: 'flex', alignItems: 'center', gap: 6,
+            letterSpacing: '0.03em', transition: 'all 0.18s',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          📍 Localities
+          {showLocalities && (
+            <span style={{
+              fontSize: 9, background: 'rgba(255,255,255,0.25)',
+              borderRadius: 4, padding: '1px 5px', fontWeight: 700,
+            }}>zoom 13+</span>
+          )}
+        </button>
+
+        {/* Constituency toggle */}
+        <button
+          onClick={() => setShowConstituencies((p) => !p)}
+          style={{
+            background: showConstituencies ? '#7c3aed' : 'white',
+            color: showConstituencies ? 'white' : '#374151',
+            border: `1.5px solid ${showConstituencies ? '#7c3aed' : '#e5e7eb'}`,
+            borderRadius: 999, padding: '7px 14px',
+            fontSize: 12, fontWeight: 700,
+            fontFamily: 'Inter,-apple-system,sans-serif',
+            cursor: 'pointer',
+            boxShadow: '0 2px 10px rgba(0,0,0,0.10)',
+            display: 'flex', alignItems: 'center', gap: 6,
+            letterSpacing: '0.03em', transition: 'all 0.18s',
+          }}
+        >
+          🏛️ Constituencies
+        </button>
+      </div>
     </div>
   );
 }
