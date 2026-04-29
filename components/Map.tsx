@@ -19,12 +19,17 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 });
 
-const MUMBAI: [number, number] = [19.2183, 72.9781];
+// Zoomed out to show all of Mumbai + surroundings
+const MUMBAI: [number, number] = [19.076, 72.877];
+const INITIAL_ZOOM = 11;
 
 function createCategoryIcon(color: string, emoji: string) {
   return L.divIcon({
     className: '',
-    html: `<div style="position:relative;width:36px;height:36px;"><div style="width:36px;height:36px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:${color};border:2.5px solid white;box-shadow:0 3px 10px rgba(0,0,0,0.3);"></div><span style="position:absolute;top:50%;left:50%;transform:translate(-50%,-56%);font-size:16px;line-height:1;">${emoji}</span></div>`,
+    html: `<div style="position:relative;width:36px;height:36px;">
+      <div style="width:36px;height:36px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:${color};border:2.5px solid white;box-shadow:0 3px 10px rgba(0,0,0,0.3);"></div>
+      <span style="position:absolute;top:50%;left:50%;transform:translate(-50%,-56%);font-size:16px;line-height:1;">${emoji}</span>
+    </div>`,
     iconSize: [36, 36],
     iconAnchor: [18, 36],
     popupAnchor: [0, -40],
@@ -47,24 +52,22 @@ function buildPopupHTML(report: Report): string {
   <div style="width:270px;font-family:Inter,-apple-system,sans-serif;">
     <div style="position:relative;">
       <img src="${report.photo_url}" alt="" style="width:100%;height:160px;object-fit:cover;display:block;" />
-      <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.55) 0%,transparent 50%);pointer-events:none;"></div>
-      <div style="position:absolute;bottom:10px;left:12px;display:flex;align-items:center;gap:6px;">
-        <span style="background:${cat?.color ?? '#374151'};color:white;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:0.03em;display:flex;align-items:center;gap:4px;">
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.6) 0%,transparent 55%);pointer-events:none;"></div>
+      <div style="position:absolute;bottom:10px;left:12px;">
+        <span style="background:${cat?.color ?? '#374151'};color:white;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:0.03em;display:inline-flex;align-items:center;gap:4px;">
           ${cat?.emoji ?? '📍'} ${cat?.label ?? report.category}
         </span>
       </div>
     </div>
     <div style="padding:12px 14px 14px;">
       ${report.description ? `<p style="margin:0 0 6px;font-size:13px;color:#1f2937;line-height:1.45;font-weight:500;">${report.description}</p>` : ''}
-      <div style="display:flex;align-items:center;gap:4px;margin-bottom:10px;">
-        ${report.area_name ? `<span style="font-size:11px;color:#9ca3af;display:flex;align-items:center;gap:3px;">📍 ${report.area_name}</span>` : ''}
-      </div>
+      ${report.area_name ? `<p style="margin:0 0 8px;font-size:11px;color:#9ca3af;">📍 ${report.area_name}</p>` : ''}
       <div style="display:flex;justify-content:space-between;align-items:center;padding-top:8px;border-top:1px solid #f3f4f6;">
         <span style="font-size:11px;color:#d1d5db;font-weight:500;">${getTimeAgo(report.created_at)}</span>
         <button
           data-report-id="${report.id}"
           data-upvotes="${report.upvotes}"
-          style="background:#fef2f2;border:1.5px solid #fecaca;border-radius:999px;padding:5px 14px;font-size:12px;font-weight:700;cursor:pointer;color:#ef4444;font-family:Inter,sans-serif;display:flex;align-items:center;gap:4px;transition:all 150ms ease;"
+          style="background:#fef2f2;border:1.5px solid #fecaca;border-radius:999px;padding:5px 14px;font-size:12px;font-weight:700;cursor:pointer;color:#ef4444;font-family:Inter,sans-serif;"
         >👍 ${report.upvotes}</button>
       </div>
     </div>
@@ -122,8 +125,14 @@ function MapInner({ reports, activeCategory, showHeatmap, onNewReport }: MapInne
           btn.dataset.voted = '1';
           const n = parseInt(btn.dataset.upvotes ?? '0');
           btn.innerHTML = `👍 ${n + 1}`;
-          btn.style.color = '#9ca3af'; btn.style.borderColor = '#e5e7eb'; btn.style.background = '#f9fafb';
-          await fetch('/api/upvote', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: report.id }) });
+          btn.style.color = '#9ca3af';
+          btn.style.borderColor = '#e5e7eb';
+          btn.style.background = '#f9fafb';
+          await fetch('/api/upvote', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: report.id }),
+          });
         });
       });
       group.addLayer(marker);
@@ -140,10 +149,11 @@ function MapInner({ reports, activeCategory, showHeatmap, onNewReport }: MapInne
     return () => { supabase.removeChannel(channel); };
   }, [onNewReport]);
 
+  // On load, try GPS — if denied just stay at the zoomed-out city view
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
       (pos) => map.setView([pos.coords.latitude, pos.coords.longitude], 14),
-      () => {}
+      () => {} // stay at MUMBAI z11
     );
   }, [map]);
 
@@ -154,12 +164,12 @@ export default function Map(props: MapInnerProps) {
   return (
     <MapContainer
       center={MUMBAI}
-      zoom={13}
+      zoom={INITIAL_ZOOM}
       style={{ width: '100vw', height: '100dvh' }}
       zoomControl
     >
       <TileLayer
-        attribution='&copy; <a href="https://carto.com">CARTO</a>'
+        attribution='&copy; <a href="https://carto.com/attributions">CARTO</a>'
         url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
         subdomains="abcd"
         maxZoom={20}
