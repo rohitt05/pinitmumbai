@@ -31,49 +31,74 @@ function WardCard({ top, area }: { top: number; area: AreaInfo }) {
         position: 'fixed',
         top,
         left: 16,
-        width: 210,
+        width: 224,
         zIndex: 900,
         background: 'white',
         borderRadius: 14,
         boxShadow: '0 4px 24px rgba(0,0,0,0.13)',
         border: '1px solid rgba(0,0,0,0.06)',
-        padding: '14px 16px',
+        overflow: 'hidden',
         fontFamily: 'Inter, sans-serif',
       }}
     >
+      {/* Header strip */}
       <div style={{
-        fontSize: 14, fontWeight: 800, color: '#0f172a',
-        letterSpacing: '-0.03em', marginBottom: 2,
-      }}>{area.name}</div>
+        background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+        padding: '10px 14px 9px',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span style={{
+            fontSize: 10, fontWeight: 800, color: '#ef4444',
+            letterSpacing: '0.1em', textTransform: 'uppercase',
+          }}>BMC Ward {area.ward}</span>
+          <span style={{
+            fontSize: 10, fontWeight: 600,
+            color: '#64748b',
+            letterSpacing: '0.04em',
+          }}>{area.zone}</span>
+        </div>
+        <div style={{
+          fontSize: 14, fontWeight: 800, color: 'white',
+          letterSpacing: '-0.02em', marginTop: 3, lineHeight: 1.2,
+        }}>{area.name}</div>
+        <div style={{
+          fontSize: 10, color: '#94a3b8', marginTop: 2,
+          fontWeight: 500, lineHeight: 1.4,
+        }}>{area.direction} Mumbai</div>
+      </div>
 
-      <div style={{
-        fontSize: 11, color: '#94a3b8', fontWeight: 500, marginBottom: 12,
-      }}>Ward #{area.ward} &nbsp;·&nbsp; {area.direction}</div>
+      {/* Neighbourhoods */}
+      <div style={{ padding: '8px 14px', borderBottom: '1px solid #f1f5f9' }}>
+        <div style={{
+          fontSize: 9, fontWeight: 700, color: '#94a3b8',
+          textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 3,
+        }}>Covers</div>
+        <div style={{ fontSize: 11, color: '#475569', lineHeight: 1.5, fontWeight: 500 }}>
+          {area.neighbourhoods}
+        </div>
+      </div>
 
+      {/* Stats row */}
       <div style={{
-        display: 'flex', alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingTop: 10, borderTop: '1px solid #f1f5f9',
+        padding: '10px 14px 12px',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <span style={{
-            fontSize: 22, fontWeight: 800, color: '#ef4444',
+            fontSize: 24, fontWeight: 800, color: '#ef4444',
             letterSpacing: '-0.04em', lineHeight: 1,
           }}>{area.count}</span>
           <span style={{
-            fontSize: 10, fontWeight: 600, color: '#94a3b8',
-            textTransform: 'uppercase', letterSpacing: '0.08em',
-          }}>reports</span>
+            fontSize: 9, fontWeight: 700, color: '#94a3b8',
+            textTransform: 'uppercase', letterSpacing: '0.1em',
+          }}>Reports</span>
         </div>
         <span style={{
           fontSize: 11, fontWeight: 700,
-          color: ic, background: `${ic}1a`,
-          padding: '4px 10px', borderRadius: 999,
+          color: ic, background: `${ic}18`,
+          padding: '5px 12px', borderRadius: 999,
+          border: `1px solid ${ic}30`,
         }}>{intensity}</span>
-      </div>
-
-      <div style={{ fontSize: 10, color: '#cbd5e1', marginTop: 6 }}>
-        {area.zone} Zone
       </div>
     </motion.div>
   );
@@ -83,7 +108,6 @@ export default function StatsCard({ totalReports, activeReports, navbarHeight, h
   const statsRef = useRef<HTMLDivElement>(null);
   const [wardTop, setWardTop] = useState(0);
 
-  // Measure the stats card bottom edge so WardCard sits exactly 10px below it
   useEffect(() => {
     if (!statsRef.current) return;
     const update = () => {
@@ -98,7 +122,7 @@ export default function StatsCard({ totalReports, activeReports, navbarHeight, h
 
   return (
     <>
-      {/* Stats card — fixed left, below navbar */}
+      {/* Stats card */}
       <motion.div
         ref={statsRef}
         initial={{ opacity: 0, y: -8 }}
@@ -109,7 +133,7 @@ export default function StatsCard({ totalReports, activeReports, navbarHeight, h
           top: navbarHeight + 16,
           left: 16,
           zIndex: 900,
-          width: 210,
+          width: 224,
           background: 'white',
           borderRadius: 14,
           padding: '13px 18px',
@@ -131,9 +155,7 @@ export default function StatsCard({ totalReports, activeReports, navbarHeight, h
             textTransform: 'uppercase', letterSpacing: '0.08em',
           }}>Active</span>
         </div>
-
         <div style={{ width: 1, height: 32, background: '#f3f4f6' }} />
-
         <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
           <span style={{
             fontSize: 22, fontWeight: 800, color: '#f97316',
@@ -146,10 +168,10 @@ export default function StatsCard({ totalReports, activeReports, navbarHeight, h
         </div>
       </motion.div>
 
-      {/* Ward card — independently fixed, measured to sit 10px below stats card */}
+      {/* Ward card — independently fixed below stats */}
       <AnimatePresence>
         {hoveredArea && wardTop > 0 && (
-          <WardCard key={hoveredArea.name} top={wardTop} area={hoveredArea} />
+          <WardCard key={hoveredArea.ward} top={wardTop} area={hoveredArea} />
         )}
       </AnimatePresence>
     </>
