@@ -7,6 +7,7 @@ import { getCategoryById } from '@/lib/categories';
 import {
   getPrabhagsByAdminWard,
   getMlaByConstituency,
+  getMicroAreasByWardNo,
   getPartyStyle,
   MUMBAI_SUBURBAN_MLAS,
 } from '@/lib/mumbai-wards';
@@ -25,8 +26,6 @@ function getDaysOld(dateStr: string): number {
   return Math.floor((Date.now() - new Date(dateStr).getTime()) / 86400000);
 }
 
-// Maps BMC_WARD_INFO keys → assembly constituency name for MLA lookup
-// We use a lightweight keyword per ward to fuzzy-match MUMBAI_SUBURBAN_MLAS
 const WARD_TO_CONSTITUENCY_HINT: Record<string, string> = {
   'A':   'Colaba',        'B':   'Byculla',       'C':   'Mumbadevi',
   'D':   'Malabar Hill',  'E':   'Byculla',       'F/N': 'Sion Koliwada',
@@ -62,14 +61,17 @@ export default function ReportBottomSheet({ report, onClose }: Props) {
   const severityBg    = severity === 'HIGH' ? '#fef2f2' : severity === 'MODERATE' ? '#fff7ed' : '#f0fdf4';
   const severityBorder= severity === 'HIGH' ? '#fecaca' : severity === 'MODERATE' ? '#fed7aa' : '#bbf7d0';
 
-  // ── Real reps lookup ──────────────────────────────────────────────────────
-  // admin_ward key: report.ward_key if present, else derive from area_name
   const adminWard: string = (report as Report & { ward_key?: string })?.ward_key ?? '';
   const prabhags = adminWard ? getPrabhagsByAdminWard(adminWard) : [];
   const constituencyHint = WARD_TO_CONSTITUENCY_HINT[adminWard] ?? '';
   const mlaInfo = constituencyHint
     ? getMlaByConstituency(constituencyHint)
-    : MUMBAI_SUBURBAN_MLAS.find(() => false); // undefined if no hint
+    : MUMBAI_SUBURBAN_MLAS.find(() => false);
+
+  // collect all micro-areas for every prabhag in this admin ward
+  const allMicroAreas: { wardNo: number; neighbourhood: string }[] = prabhags.flatMap((p) =>
+    getMicroAreasByWardNo(p.ward_no).map((n) => ({ wardNo: p.ward_no, neighbourhood: n }))
+  );
 
   const handleUpvote = async () => {
     if (voted || !report) return;
@@ -226,7 +228,6 @@ export default function ReportBottomSheet({ report, onClose }: Props) {
                           border: '1px solid #f1f5f9',
                         }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                            {/* Avatar */}
                             <div style={{
                               width: 36, height: 36, borderRadius: '50%',
                               background: ps.bg, border: `1px solid ${ps.border}`,
@@ -246,6 +247,49 @@ export default function ReportBottomSheet({ report, onClose }: Props) {
                         </div>
                       );
                     })}
+                  </div>
+                )}
+              </div>
+
+              {/* ── LAYER 2b: Micro-area / Neighbourhood Tiles ──────────── */}
+              <div style={{ borderTop: '1px solid #f1f5f9', padding: '18px 16px 0' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+                  <div style={{ fontSize: 10, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.12em' }}>
+                    Micro Areas — Ward {adminWard || 'Unknown'}
+                  </div>
+                  {allMicroAreas.length > 0 && (
+                    <span style={{ fontSize: 9, color: '#94a3b8', fontWeight: 600 }}>
+                      {allMicroAreas.length} localities
+                    </span>
+                  )}
+                </div>
+
+                {allMicroAreas.length === 0 ? (
+                  /* Empty state */
+                  <div style={{
+                    textAlign: 'center', padding: '20px 12px 24px',
+                    background: '#fafafa', borderRadius: 14,
+                    border: '1.5px dashed #e2e8f0', marginBottom: 20,
+                  }}>
+                    <div style={{ fontSize: 22, marginBottom: 6 }}>🗺️</div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: '#334155', marginBottom: 4 }}>
+                      No micro-area data yet
+                    </div>
+                    <div style={{ fontSize: 11, color: '#94a3b8', fontWeight: 500 }}>
+                      Neighbourhood tiles for this ward are being mapped.
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
+                    {allMicroAreas.map(({ wardNo, neighbourhood }) => (
+                      <MicroAreaTile
+                        key={`${wardNo}-${neighbourhood}`}
+                        neighbourhood={neighbourhood}
+                        wardNo={wardNo}
+                        // Future: pass a count from reports prop when available
+                        reportCount={0}
+                      />
+                    ))}
                   </div>
                 )}
               </div>
@@ -356,6 +400,74 @@ export default function ReportBottomSheet({ report, onClose }: Props) {
         </>
       )}
     </AnimatePresence>
+  );
+}
+
+// ── Micro-area tile ─────────────────────────────────────────────────────────
+function MicroAreaTile({
+  neighbourhood,
+  wardNo,
+  reportCount,
+}: {
+  neighbourhood: string;
+  wardNo: number;
+  reportCount: number;
+}) {
+  const hasData = reportCount > 0;
+  return (
+    <div
+      style={{
+        position: 'relative',
+        background: hasData ? '#fff7ed' : '#f8fafc',
+        border: `1.5px solid ${hasData ? '#fed7aa' : '#e2e8f0'}`,
+        borderRadius: 10,
+        padding: '8px 10px 8px 10px',
+        minWidth: 100,
+        maxWidth: 160,
+        flexShrink: 0,
+      }}
+    >
+      {/* Prabhag badge */}
+      <div style={{
+        fontSize: 8, fontWeight: 800, color: '#94a3b8',
+        textTransform: 'uppercase', letterSpacing: '0.1em',
+        marginBottom: 3,
+      }}>
+        Prabhag {wardNo}
+      </div>
+
+      {/* Neighbourhood name */}
+      <div style={{
+        fontSize: 11, fontWeight: 700, color: '#1e293b',
+        lineHeight: 1.3, marginBottom: 5,
+      }}>
+        {neighbourhood}
+      </div>
+
+      {/* Status badge */}
+      {hasData ? (
+        <span style={{
+          display: 'inline-flex', alignItems: 'center', gap: 3,
+          background: '#fef2f2', color: '#dc2626',
+          border: '1px solid #fecaca',
+          borderRadius: 6, padding: '2px 6px',
+          fontSize: 9, fontWeight: 800,
+        }}>
+          <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#ef4444', display: 'inline-block' }} />
+          {reportCount} report{reportCount !== 1 ? 's' : ''}
+        </span>
+      ) : (
+        <span style={{
+          display: 'inline-flex', alignItems: 'center', gap: 3,
+          background: '#f0fdf4', color: '#16a34a',
+          border: '1px solid #bbf7d0',
+          borderRadius: 6, padding: '2px 6px',
+          fontSize: 9, fontWeight: 700,
+        }}>
+          <span style={{ fontSize: 8 }}>✓</span> No data available
+        </span>
+      )}
+    </div>
   );
 }
 
