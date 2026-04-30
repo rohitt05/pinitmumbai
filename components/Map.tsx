@@ -85,19 +85,19 @@ function createDotIcon() {
 
 const WARD_DEFAULT_STYLE = {
   fillColor: 'transparent', fillOpacity: 0,
-  color: 'rgba(153,27,27,0.35)', weight: 1.2, opacity: 1,
+  color: 'rgba(153,27,27,0.25)', weight: 1, opacity: 1,
 };
 const WARD_HOVER_STYLE = {
-  fillColor: 'rgba(239,68,68,0.14)', fillOpacity: 1,
-  color: '#ef4444', weight: 2.5, opacity: 1,
+  fillColor: 'rgba(239,68,68,0.10)', fillOpacity: 1,
+  color: '#ef4444', weight: 2, opacity: 1,
 };
 const AC_DEFAULT_STYLE = {
   fillColor: 'transparent', fillOpacity: 0,
-  color: 'rgba(109,40,217,0.5)', weight: 2, opacity: 1, dashArray: '6,5',
+  color: 'rgba(109,40,217,0.4)', weight: 1.5, opacity: 1, dashArray: '6,5',
 };
 const AC_HOVER_STYLE = {
-  fillColor: 'rgba(139,92,246,0.12)', fillOpacity: 1,
-  color: '#7c3aed', weight: 3, opacity: 1, dashArray: '',
+  fillColor: 'rgba(139,92,246,0.10)', fillOpacity: 1,
+  color: '#7c3aed', weight: 2.5, opacity: 1, dashArray: '',
 };
 
 interface MapInnerProps {
@@ -271,7 +271,7 @@ export default function Map({ totalReports, navbarHeight, onPinClick, ...props }
   const handleAreaHover = useCallback((a: AreaInfo | null) => props.onAreaHover(a), [props.onAreaHover]);
   const handlePinClick  = useCallback((r: Report) => onPinClick(r), [onPinClick]);
   const [showConstituencies, setShowConstituencies] = useState(props.showConstituencies ?? false);
-  const [showLocalities, setShowLocalities]         = useState(false);
+  const [showLocalities, setShowLocalities]         = useState(true);
 
   useEffect(() => {
     if (props.showConstituencies !== undefined) setShowConstituencies(props.showConstituencies);
@@ -286,9 +286,10 @@ export default function Map({ totalReports, navbarHeight, onPinClick, ...props }
         zoomControl={false}
         ref={mapRef}
       >
+        {/* CARTO Voyager — warm, detailed, award-level basemap */}
         <TileLayer
           attribution='&copy; <a href="https://carto.com/attributions">CARTO</a>'
-          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+          url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
           subdomains="abcd"
           maxZoom={20}
         />
@@ -320,7 +321,7 @@ export default function Map({ totalReports, navbarHeight, onPinClick, ...props }
         }}>−</button>
       </div>
 
-      {/* Map layer toggles — stacked vertically above BottomBar */}
+      {/* Map layer toggles */}
       <div style={{
         position: 'fixed', bottom: navbarHeight + 24, right: 16, zIndex: 900,
         display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-end',
@@ -348,7 +349,7 @@ export default function Map({ totalReports, navbarHeight, onPinClick, ...props }
             <span style={{
               fontSize: 9, background: 'rgba(255,255,255,0.25)',
               borderRadius: 4, padding: '1px 5px', fontWeight: 700,
-            }}>zoom 13+</span>
+            }}>zoom 10+</span>
           )}
         </button>
 
